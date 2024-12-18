@@ -32,7 +32,7 @@ const Services = () => {
       image: "/20241112_163334.jpg",
       title: "Sustainable Farming Workshops",
       description:
-        "Teaching modern and sustainable farming techniques to enhance productivity while protecting the environment. We aim to integrate these practices with potash production and market access.",
+        "Teaching modern and sustainable farming techniques to enhance productivity while protecting the environment. We aim to integrate these practices with potash ",
     },
   ];
 
@@ -42,9 +42,9 @@ const Services = () => {
 
   return (
     <div className="p-10 bg-gray-50">
-      <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">
-        Services We Provide
-      </h2>
+      <h1 className="text-4xl font-bold text-green-700 text-center mb-10 mt-16">
+        Our Expertise: Empowering Sustainable Solutions and Global Outreach
+      </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {services.map((service) => (
           <div

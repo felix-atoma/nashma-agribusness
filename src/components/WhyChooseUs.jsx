@@ -18,10 +18,10 @@ const WhyChooseUs = () => {
   return (
     <>
       {loading && (
-        <div className="flex justify-center items-center fixed inset-0 bg-white z-50">
-          <div className="relative flex justify-center items-center w-24 h-24">
+        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+          <div className="relative flex items-center justify-center w-24 h-24">
             <img
-              src="src/assets/logo (2) (1).png"
+              src="/src/assets/logo (2) (1).png"
               alt="Logo"
               className="h-12 w-12"
             />
@@ -29,47 +29,54 @@ const WhyChooseUs = () => {
           </div>
         </div>
       )}
-      <div className="flex flex-col md:flex-row justify-between items-center p-10 bg-white h-screen gap-6">
-        <div className="flex-1 pr-6">
-          <h1 className="text-3xl text-green-600 mb-4">Why you should choose us</h1>
-          <p className="text-gray-700 mb-4">
-            In rural Ghanaian cocoa communities, women and youth face idle
-            months during off-seasons, while 70-90% of cocoa pods rot, harming
-            environments and health.
+
+      <div className="flex flex-col md:flex-row items-center gap-8 px-6 py-12 bg-white">
+        {/* Text Section */}
+        <div className="w-full md:w-1/2 text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl text-green-600 font-bold mb-4">
+            Why Choose Us?
+          </h1>
+          <p className="text-gray-700 leading-relaxed mb-4">
+            In rural Ghanaian cocoa communities, women and youth face idle months during off-seasons, while 70-90% of cocoa pods rot, harming environments and health.
           </p>
-          <p className="text-gray-700 mb-4">
-            Our innovative solution empowers women and youth to transform cocoa
-            waste into valuable potash, generating income and sustainability.
+          <p className="text-gray-700 leading-relaxed mb-4">
+            Our innovative solution empowers women and youth to transform cocoa waste into valuable potash, generating income and sustainability.
           </p>
-          <ul className="list-none p-0 mb-4">
-            <li className="flex items-center gap-2 text-gray-700 mb-2">
-              <FaHandsHelping className="text-green-600 text-xl" /> Economic opportunities for
-              marginalized groups.
+
+          <ul className="space-y-3">
+            <li className="flex items-center gap-3 text-gray-700">
+              <FaHandsHelping className="text-green-600 text-xl" />
+              Economic opportunities for marginalized groups.
             </li>
-            <li className="flex items-center gap-2 text-gray-700 mb-2">
-              <FaLightbulb className="text-green-600 text-xl" /> Reduced environmental hazards.
+            <li className="flex items-center gap-3 text-gray-700">
+              <FaLightbulb className="text-green-600 text-xl" />
+              Reduced environmental hazards.
             </li>
-            <li className="flex items-center gap-2 text-gray-700 mb-2">
-              <FaSeedling className="text-green-600 text-xl" /> Sustainable cocoa production.
+            <li className="flex items-center gap-3 text-gray-700">
+              <FaSeedling className="text-green-600 text-xl" />
+              Sustainable cocoa production.
             </li>
           </ul>
-          <p className="text-gray-700 mb-4">
-            Join Nashma Agribusiness in unlocking cocoa waste potential,
-            transforming rural livelihoods.
+
+          <p className="text-gray-700 mt-6">
+            Join Nashma Agribusiness in unlocking cocoa waste potential, transforming rural livelihoods.
           </p>
+
           <button
-            className="flex items-center bg-green-600 text-white rounded-lg px-6 py-3 mt-4 transition-colors duration-300 hover:bg-green-700"
+            className="mt-6 flex items-center justify-center gap-3 bg-green-600 text-white text-lg font-semibold px-6 py-3 rounded-lg w-full md:w-auto transition duration-300 hover:bg-green-700"
             onClick={handleButtonClick}
           >
-            <FiPhoneCall className="mr-2 text-lg" />
-            (+233) 0545086577/0243241649
+            <FiPhoneCall className="text-xl" />
+            (+233) 0545086577 / 0243241649
           </button>
         </div>
-        <div className="flex-1 flex justify-center items-center">
+
+        {/* Image Section */}
+        <div className="w-full md:w-1/2 flex justify-center">
           <img
             src="/20241112_165130.jpg"
-            alt="Agribusiness Illustration"
-            className="w-full max-h-80 object-cover rounded-lg"
+            alt="Agribusiness"
+            className="w-full max-w-sm md:max-w-md lg:max-w-lg object-cover rounded-lg shadow-md"
           />
         </div>
       </div>

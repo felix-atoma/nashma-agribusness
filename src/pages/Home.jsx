@@ -44,7 +44,7 @@ const Home = () => {
   return (
     <div className="w-full">
       {/* Hero Carousel */}
-      <div className="relative h-screen w-full">
+      <div className="relative h-[80vh] sm:h-screen w-full">
         {slides.map((slide, index) => (
           <div
             key={index}
@@ -53,41 +53,43 @@ const Home = () => {
             }`}
           >
             <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 flex flex-col justify-center items-center bg-black bg-opacity-50 text-white p-5">
-              <h1 className="text-4xl font-bold mb-4">{slide.title}</h1>
-              <p className="text-lg">{slide.description}</p>
+            <div className="absolute inset-0 flex flex-col justify-center items-center text-center bg-black bg-opacity-50 text-white p-4 sm:p-6">
+              <h1 className="text-2xl sm:text-4xl font-bold mb-3">{slide.title}</h1>
+              <p className="text-sm sm:text-lg">{slide.description}</p>
             </div>
           </div>
         ))}
 
         {/* Carousel Dots */}
-        <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full ${
+              className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full ${
                 index === currentSlide ? "bg-white" : "bg-gray-300"
-              }`}
+              } transition-all`}
             ></button>
           ))}
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="bg-gray-50 py-10">
-        <ExperienceSection />
-        <AgribusinessCounter />
-        <WhyChooseUs />
-        <ContactPage />
+      <div className="bg-gray-50 py-10 px-4 sm:px-10">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <ExperienceSection />
+          <AgribusinessCounter />
+          <WhyChooseUs />
+          <ContactPage />
+        </div>
       </div>
 
       {/* Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className="fixed bottom-5 right-5 bg-green-600 text-white rounded-full p-4 shadow-md transition hover:bg-green-700 z-50"
+        className="fixed bottom-5 right-5 sm:bottom-8 sm:right-8 bg-green-600 text-white rounded-full p-3 sm:p-4 shadow-md transition hover:bg-green-700 z-50"
       >
-        <FaArrowUp className="text-2xl" />
+        <FaArrowUp className="text-xl sm:text-2xl" />
       </button>
     </div>
   );

@@ -69,7 +69,7 @@ const ContactForm = () => {
       {/* Image */}
       <div className="relative w-full mb-6">
         <img
-          src="/20241112_164309.jpg"
+          src="/IMG-20250307-WA0027.jpg"
           alt="Contact"
           className="w-full h-auto md:h-[400px] object-cover"
         />

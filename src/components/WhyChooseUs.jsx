@@ -74,7 +74,7 @@ const WhyChooseUs = () => {
         {/* Image Section */}
         <div className="w-full md:w-1/2 flex justify-center">
           <img
-            src="/20241112_165130.jpg"
+            src="\IMG-20250307-WA0011.jpg"
             alt="Agribusiness"
             className="w-full max-w-sm md:max-w-md lg:max-w-lg object-cover rounded-lg shadow-md"
           />

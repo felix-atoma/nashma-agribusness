@@ -34,7 +34,7 @@ const ExperienceSection = () => {
         {/* Image Section */}
         <div className="w-full md:w-1/2 flex justify-center">
           <img
-            src="/20241112_164309.jpg" // Replace with the actual image path
+            src="/IMG-20250307-WA0007.jpg" // Replace with the actual image path
             alt="Experience"
             className="w-full max-w-xs md:max-w-md rounded-lg shadow-lg"
           />

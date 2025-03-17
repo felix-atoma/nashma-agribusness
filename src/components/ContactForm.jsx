@@ -164,7 +164,7 @@ const ContactForm = () => {
           <div className="flex flex-col md:flex-row items-center gap-3">
             <FaPhone size={24} className="text-green-600" />
             <div>
-              <p className="m-0">0545086577</p>
+              <p className="m-0">0545086577 / 0243241649</p>
               <p className="m-0">Mon to Fri 9am to 5pm</p>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import apiClient from "../utils/apiClient"; 
+import { toast } from "react-toastify"; // ✅ import toast
 
 const CartContext = createContext();
 
@@ -15,6 +16,7 @@ export const CartProvider = ({ children }) => {
         setCartItems(items || []);
       } catch (error) {
         console.error("Fetch cart failed:", error);
+        toast.error("Failed to fetch cart");
       } finally {
         setIsLoading(false);
       }
@@ -31,8 +33,10 @@ export const CartProvider = ({ children }) => {
         quantity: 1,
       });
       setCartItems(items);
+      toast.success("Added to cart!"); // ✅ toast
     } catch (error) {
       console.error("Add to cart failed:", error);
+      toast.error("Failed to add item");
     }
   };
 
@@ -41,8 +45,10 @@ export const CartProvider = ({ children }) => {
     try {
       const { items } = await apiClient.delete(`/cart/${id}`);
       setCartItems(items);
+      toast.info("Item removed from cart"); // ✅ toast
     } catch (error) {
       console.error("Remove from cart failed:", error);
+      toast.error("Failed to remove item");
     }
   };
 
@@ -52,8 +58,10 @@ export const CartProvider = ({ children }) => {
     try {
       const { items } = await apiClient.patch(`/cart/${id}`, { quantity });
       setCartItems(items);
+      toast.success("Quantity updated"); // ✅ toast
     } catch (error) {
       console.error("Update quantity failed:", error);
+      toast.error("Failed to update quantity");
     }
   };
 
@@ -62,12 +70,13 @@ export const CartProvider = ({ children }) => {
     try {
       await apiClient.delete("/cart");
       setCartItems([]);
+      toast.success("Cart cleared"); // ✅ toast
     } catch (error) {
       console.error("Clear cart failed:", error);
+      toast.error("Failed to clear cart");
     }
   };
 
-  // Calculate totals
   const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
   const cartTotal = cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
 

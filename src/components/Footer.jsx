@@ -1,27 +1,25 @@
 import React, { useState } from "react";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 import { SiTiktok } from "react-icons/si";
+import { toast } from "react-toastify";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
-
-    setStatus("");
     setLoading(true);
 
     if (!email.includes("@")) {
-      setStatus("Please enter a valid email address.");
+      toast.error("Please enter a valid email address.");
       setLoading(false);
       return;
     }
 
     const apiBase = import.meta.env?.VITE_API_BASE_URL;
     if (!apiBase) {
-      setStatus("API base URL is not set.");
+      toast.error("API base URL is not set.");
       setLoading(false);
       return;
     }
@@ -36,7 +34,7 @@ const Footer = () => {
       });
 
       if (res.ok) {
-        setStatus("Thank you for subscribing!");
+        toast.success("Thank you for subscribing!");
         setEmail("");
       } else {
         const data = await res.json();
@@ -44,7 +42,7 @@ const Footer = () => {
       }
     } catch (err) {
       console.error("Subscription error:", err);
-      setStatus("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -53,10 +51,8 @@ const Footer = () => {
   return (
     <footer className="bg-green-50 text-green-600 py-8">
       <div className="container mx-auto px-4 flex flex-col md:flex-row md:justify-between md:items-start gap-6">
-        {/* Logo */}
         <div className="text-xl font-bold">Nashma Agribusiness Ltd.</div>
 
-        {/* Quick Links */}
         <div className="flex flex-col md:items-start">
           {["About", "Services", "Mission", "Contact"].map((link, idx) => (
             <a
@@ -69,7 +65,6 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Newsletter */}
         <div className="flex flex-col w-full md:w-[300px]">
           <h3 className="font-semibold mb-2">Subscribe to our Newsletter</h3>
           <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
@@ -89,12 +84,8 @@ const Footer = () => {
               {loading ? "Subscribing..." : "Subscribe"}
             </button>
           </form>
-          {status && (
-            <p className="mt-2 text-sm text-green-700">{status}</p>
-          )}
         </div>
 
-        {/* Social Media Links */}
         <div className="flex justify-center gap-4 mt-4 md:mt-0">
           {[
             {
@@ -123,7 +114,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Copyright */}
       <p className="text-center text-sm mt-6">
         &copy; {new Date().getFullYear()} Nashma Agribusiness Ltd. All Rights Reserved.
       </p>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { FaHome, FaPhone, FaEnvelope } from "react-icons/fa";
+import { toast } from "react-toastify";
+
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -22,54 +24,48 @@ const ContactForm = () => {
     return emailRegex.test(email);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!validateEmail(formData.email)) {
-      setStatusMessage({ text: "Invalid email format.", type: "error" });
-      return;
-    }
+  if (!validateEmail(formData.email)) {
+    toast.error("Invalid email format.");
+    return;
+  }
 
-    setIsSending(true);
-    setStatusMessage({ text: "", type: "" });
+  setIsSending(true);
 
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/contact`;
+  const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/contact`;
 
-    try {
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+  try {
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (res.ok) {
+      toast.success("Your message has been sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
       });
-
-      if (res.ok) {
-        setStatusMessage({
-          text: "Your message has been sent successfully!",
-          type: "success",
-        });
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          subject: "",
-          message: "",
-        });
-      } else {
-        const data = await res.json();
-        throw new Error(data.message || "Submission failed.");
-      }
-    } catch (error) {
-      console.error("Submission error:", error);
-      setStatusMessage({
-        text: "An error occurred. Please try again later.",
-        type: "error",
-      });
-    } finally {
-      setIsSending(false);
+    } else {
+      const data = await res.json();
+      throw new Error(data.message || "Submission failed.");
     }
-  };
+  } catch (error) {
+    console.error("Submission error:", error);
+    toast.error("An error occurred. Please try again later.");
+  } finally {
+    setIsSending(false);
+  }
+};
+
 
   return (
     <div className="w-full mx-auto p-4 md:p-8">

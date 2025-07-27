@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify"; // ✅ Toastify import
 
 const Cart = () => {
   const { 
@@ -30,20 +31,19 @@ const Cart = () => {
     setIsCheckingOut(true);
     
     try {
-      // Validate customer info
       if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
-        throw new Error("Please fill in all required fields");
+        toast.error("Please fill in all required fields.");
+        return;
       }
 
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Clear cart and show success
+
       clearCart();
       setCheckoutSuccess(true);
+      toast.success("Order placed successfully!");
     } catch (error) {
       console.error("Checkout failed:", error);
-      alert(error.message || "Checkout failed. Please try again.");
+      toast.error(error.message || "Checkout failed. Please try again.");
     } finally {
       setIsCheckingOut(false);
     }

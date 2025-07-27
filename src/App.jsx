@@ -14,6 +14,10 @@ import Cart from "./pages/Cart"; // Import the Cart component
 
 import { CartProvider } from './context/CartContext';
 
+// 🟡 Toastify imports
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -27,7 +31,7 @@ function App() {
         { path: "/contact", element: <Contact /> },
         { path: "/faq", element: <FAQPage /> },
         { path: "/products", element: <Products /> },
-        { path: "/cart", element: <Cart /> }, // Add cart route
+        { path: "/cart", element: <Cart /> },
       ],
     },
   ]);
@@ -35,6 +39,7 @@ function App() {
   return (
     <CartProvider>
       <RouterProvider router={router} />
+      <ToastContainer position="top-right" autoClose={3000} />
     </CartProvider>
   );
 }

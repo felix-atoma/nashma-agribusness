@@ -58,7 +58,7 @@ const Footer = () => {
 
         {/* Quick Links */}
         <div className="flex flex-col md:items-start">
-          {["About", "Services", "Contact"].map((link, idx) => (
+          {["About", "Services", "Mission", "Contact"].map((link, idx) => (
             <a
               key={idx}
               href={`/${link.toLowerCase().replace(/\s+/g, "")}`}
@@ -124,10 +124,9 @@ const Footer = () => {
       </div>
 
       {/* Copyright */}
-<p className="text-center text-sm mt-6">
-  &copy; {new Date().getFullYear()} Nashma Agribusiness Ltd. All Rights Reserved.
-</p>
-
+      <p className="text-center text-sm mt-6">
+        &copy; {new Date().getFullYear()} Nashma Agribusiness Ltd. All Rights Reserved.
+      </p>
     </footer>
   );
 };

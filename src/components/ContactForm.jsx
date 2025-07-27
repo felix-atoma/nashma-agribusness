@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FaHome, FaPhone, FaEnvelope } from "react-icons/fa";
-import emailjs from "emailjs-com";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -15,10 +14,7 @@ const ContactForm = () => {
   const [statusMessage, setStatusMessage] = useState({ text: "", type: "" });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const validateEmail = (email) => {
@@ -37,28 +33,39 @@ const ContactForm = () => {
     setIsSending(true);
     setStatusMessage({ text: "", type: "" });
 
-    const emailData = {
-      to_name: "Nashma Admin",
-      from_name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      subject: formData.subject,
-      message: formData.message,
-    };
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/contact`;
 
     try {
-      await emailjs.send(
-        "service_qvw1nee", 
-        "template_nck1umh",
-        emailData,
-        "QKLwxjX-pqOTBiWsv"
-      );
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      setStatusMessage({ text: "Your message has been sent successfully!", type: "success" });
-      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+      if (res.ok) {
+        setStatusMessage({
+          text: "Your message has been sent successfully!",
+          type: "success",
+        });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        const data = await res.json();
+        throw new Error(data.message || "Submission failed.");
+      }
     } catch (error) {
-      setStatusMessage({ text: "An error occurred. Please try again later.", type: "error" });
-      console.error("EmailJS error:", error);
+      console.error("Submission error:", error);
+      setStatusMessage({
+        text: "An error occurred. Please try again later.",
+        type: "error",
+      });
     } finally {
       setIsSending(false);
     }
@@ -66,7 +73,6 @@ const ContactForm = () => {
 
   return (
     <div className="w-full mx-auto p-4 md:p-8">
-      {/* Image */}
       <div className="relative w-full mb-6">
         <img
           src="/IMG-20250307-WA0027.jpg"
@@ -75,55 +81,28 @@ const ContactForm = () => {
         />
       </div>
 
-      {/* Heading */}
       <h2 className="text-2xl md:text-3xl mb-6 text-gray-800 text-center md:text-left">
         Get in Touch
       </h2>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12">
-        {/* Form Section */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 w-full">
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter your name"
-            value={formData.name}
-            onChange={handleChange}
-            className="p-3 border border-green-600 text-base w-full"
-            required
-          />
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 flex flex-col gap-4 w-full"
+        >
+          {["name", "email", "phone", "subject"].map((field) => (
+            <input
+              key={field}
+              type={field === "email" ? "email" : "text"}
+              name={field}
+              placeholder={`Enter your ${field}`}
+              value={formData[field]}
+              onChange={handleChange}
+              className="p-3 border border-green-600 text-base w-full"
+              required
+            />
+          ))}
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={formData.email}
-            onChange={handleChange}
-            className="p-3 border border-green-600 text-base w-full"
-            required
-          />
-
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Enter your phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            className="p-3 border border-green-600 text-base w-full"
-            required
-          />
-
-          <input
-            type="text"
-            name="subject"
-            placeholder="Enter subject"
-            value={formData.subject}
-            onChange={handleChange}
-            className="p-3 border border-green-600 text-base w-full"
-            required
-          />
-
-          {/* Message Field (Last Input Before Submit) */}
           <textarea
             name="message"
             placeholder="Enter your message"
@@ -135,7 +114,13 @@ const ContactForm = () => {
           />
 
           {statusMessage.text && (
-            <p className={`mt-2 text-sm text-center ${statusMessage.type === "success" ? "text-green-600" : "text-red-600"}`} aria-live="polite">
+            <p
+              className={`mt-2 text-sm text-center ${
+                statusMessage.type === "success"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               {statusMessage.text}
             </p>
           )}
@@ -143,7 +128,9 @@ const ContactForm = () => {
           <button
             type="submit"
             className={`p-3 border-2 border-green-600 bg-white text-green-600 font-bold text-lg w-full md:w-[200px] mt-4 ${
-              isSending ? "cursor-not-allowed opacity-50" : "hover:bg-green-600 hover:text-white transition-all"
+              isSending
+                ? "cursor-not-allowed opacity-50"
+                : "hover:bg-green-600 hover:text-white transition-all"
             }`}
             disabled={isSending}
           >
@@ -151,7 +138,6 @@ const ContactForm = () => {
           </button>
         </form>
 
-        {/* Contact Info Section */}
         <div className="flex-1 flex flex-col gap-6 text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-3">
             <FaHome size={24} className="text-green-600" />

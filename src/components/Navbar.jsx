@@ -7,7 +7,8 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth <= 768);
   const [loading, setLoading] = useState(false);
-  const { cart } = useCart();
+  // Changed from { cart } to { cartItems, itemCount }
+  const { cartItems, itemCount } = useCart();
 
   useEffect(() => {
     const handleResize = () => setIsSmallScreen(window.innerWidth <= 768);
@@ -66,9 +67,10 @@ const Navbar = () => {
             <li className="relative">
               <Link to="/cart">
                 <FaShoppingCart size={24} className="text-green-600" />
-                {cart?.length > 0 && (
+                {/* Changed from cart?.length to itemCount or cartItems.length */}
+                {itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                    {cart.length}
+                    {itemCount}
                   </span>
                 )}
               </Link>
@@ -108,9 +110,10 @@ const Navbar = () => {
             <Link to="/cart" onClick={() => setMenuOpen(false)} className="flex items-center justify-center gap-2 text-green-600 hover:text-green-800 font-bold text-lg">
               <FaShoppingCart />
               Cart
-              {cart?.length > 0 && (
+              {/* Changed from cart?.length to itemCount */}
+              {itemCount > 0 && (
                 <span className="bg-red-500 text-white text-xs rounded-full px-2 ml-1">
-                  {cart.length}
+                  {itemCount}
                 </span>
               )}
             </Link>

@@ -1,21 +1,22 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const baseURL = import.meta.env.VITE_API_BASE_URL || "https://nashma-backend-1.onrender.com";
 if (!baseURL) {
-  throw new Error("❌ Missing VITE_API_BASE_URL in .env");
+  throw new Error("❌ Missing API base URL configuration");
 }
 
-console.log("✅ Loaded API base URL:", baseURL);
+console.log("✅ API base URL:", baseURL);
 
 const apiClient = axios.create({
   baseURL,
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || "5000"),
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
+// Request interceptor
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -24,16 +25,34 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Response interceptor
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    // Store token if it comes in response
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token);
+    }
+    return response.data;
+  },
   (error) => {
-    console.error("API Error:", {
+    const errorDetails = {
       url: error.config?.url,
+      method: error.config?.method,
       status: error.response?.status,
-      message: error.message,
       data: error.response?.data,
-    });
-    return Promise.reject(error);
+      message: error.message,
+      code: error.code,
+    };
+
+    console.error("API Error:", errorDetails);
+    
+    // Handle 401 unauthorized errors
+    if (errorDetails.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(errorDetails);
   }
 );
 

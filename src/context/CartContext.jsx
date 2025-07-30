@@ -1,98 +1,206 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import apiClient from "../utils/apiClient"; 
-import { toast } from "react-toastify"; // ✅ import toast
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import apiClient from '../utils/apiClient';
+import { toast } from 'react-toastify';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [subtotal, setSubtotal] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Fetch cart on mount
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const { items } = await apiClient.get("/cart");
-        setCartItems(items || []);
-      } catch (error) {
-        console.error("Fetch cart failed:", error);
-        toast.error("Failed to fetch cart");
-      } finally {
-        setIsLoading(false);
+  // Fetch cart data from backend
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get('/api/cart');
+      
+      setCartItems(response.data.items || []);
+      setSubtotal(response.data.subtotal || 0);
+      setItemCount(response.data.itemCount || 0);
+      setHasInitialized(true);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+      
+      // Only show toast for non-auth errors and only once
+      if (error.status !== 401 && !hasInitialized) {
+        toast.error('Failed to load cart');
       }
-    };
-    fetchCart();
-  }, []);
+      
+      // Set default values for unauthenticated users
+      if (error.status === 401) {
+        setCartItems([]);
+        setSubtotal(0);
+        setItemCount(0);
+      }
+      
+      setHasInitialized(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Add to cart
-  const addToCart = async (item) => {
-    if (!item?._id) return;
+  // Add item to cart
+  const addToCart = async (productId, quantity = 1) => {
     try {
-      const { items } = await apiClient.post("/cart", {
-        productId: item._id,
-        quantity: 1,
+      console.log('🛒 Adding to cart:', { productId, quantity });
+      
+      const response = await apiClient.post('/api/cart', {
+        productId: productId,
+        quantity: Math.max(1, Math.round(Number(quantity)))
       });
-      setCartItems(items);
-      toast.success("Added to cart!"); // ✅ toast
+
+      console.log('✅ Cart updated:', response);
+      
+      // Update local state with backend response
+      setCartItems(response.data.items || []);
+      setSubtotal(response.data.subtotal || 0);
+      setItemCount(response.data.itemCount || 0);
+      
+      toast.success('Item added to cart');
+      return { success: true };
     } catch (error) {
-      console.error("Add to cart failed:", error);
-      toast.error("Failed to add item");
+      console.error('❌ Add to cart failed:', error);
+      
+      let errorMessage = 'Failed to add item to cart';
+      
+      if (error.status === 400) {
+        errorMessage = error.data?.message || 'Invalid product or quantity';
+      } else if (error.status === 404) {
+        errorMessage = 'Product not available or out of stock';
+      } else if (error.status === 401) {
+        errorMessage = 'Please login to add items to cart';
+        throw new Error('Authentication required');
+      }
+      
+      toast.error(errorMessage);
+      return { success: false, message: errorMessage };
     }
   };
 
-  // Remove from cart
-  const removeFromCart = async (id) => {
+  // Remove item from cart
+  const removeFromCart = async (productId) => {
     try {
-      const { items } = await apiClient.delete(`/cart/${id}`);
-      setCartItems(items);
-      toast.info("Item removed from cart"); // ✅ toast
+      const response = await apiClient.delete(`/api/cart/${productId}`);
+      
+      setCartItems(response.data.items || []);
+      setSubtotal(response.data.subtotal || 0);
+      setItemCount(response.data.itemCount || 0);
+      
+      toast.success('Item removed from cart');
+      return { success: true };
     } catch (error) {
-      console.error("Remove from cart failed:", error);
-      toast.error("Failed to remove item");
+      console.error('Failed to remove from cart:', error);
+      toast.error('Failed to remove item');
+      return { success: false };
     }
   };
 
-  // Update quantity
-  const updateQuantity = async (id, quantity) => {
-    if (Number(quantity) < 1) return;
+  // Update item quantity
+  const updateQuantity = async (productId, quantity) => {
     try {
-      const { items } = await apiClient.patch(`/cart/${id}`, { quantity });
-      setCartItems(items);
-      toast.success("Quantity updated"); // ✅ toast
+      const qty = Math.max(0, Math.min(100, Math.round(Number(quantity))));
+      
+      const response = await apiClient.patch('/api/cart', {
+        items: [{ productId, quantity: qty }]
+      });
+      
+      setCartItems(response.data.items || []);
+      setSubtotal(response.data.subtotal || 0);
+      setItemCount(response.data.itemCount || 0);
+      
+      return { success: true };
     } catch (error) {
-      console.error("Update quantity failed:", error);
-      toast.error("Failed to update quantity");
+      console.error('Failed to update quantity:', error);
+      toast.error('Failed to update quantity');
+      return { success: false };
     }
   };
 
-  // Clear cart
+  // Clear entire cart
   const clearCart = async () => {
     try {
-      await apiClient.delete("/cart");
+      await apiClient.delete('/api/cart');
+      
       setCartItems([]);
-      toast.success("Cart cleared"); // ✅ toast
+      setSubtotal(0);
+      setItemCount(0);
+      
+      toast.success('Cart cleared');
+      return { success: true };
     } catch (error) {
-      console.error("Clear cart failed:", error);
-      toast.error("Failed to clear cart");
+      console.error('Failed to clear cart:', error);
+      toast.error('Failed to clear cart');
+      return { success: false };
     }
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
-  const cartTotal = cartItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
+  // Bulk update cart items
+  const updateCart = async (items) => {
+    try {
+      const response = await apiClient.patch('/api/cart', { items });
+      
+      setCartItems(response.data.items || []);
+      setSubtotal(response.data.subtotal || 0);
+      setItemCount(response.data.itemCount || 0);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update cart:', error);
+      toast.error('Failed to update cart');
+      return { success: false };
+    }
+  };
+
+  // Get item quantity for a specific product
+  const getItemQuantity = (productId) => {
+    const item = cartItems.find(item => 
+      item.product._id === productId || item.product === productId
+    );
+    return item ? item.quantity : 0;
+  };
+
+  // Check if product is in cart
+  const isInCart = (productId) => {
+    return cartItems.some(item => 
+      item.product._id === productId || item.product === productId
+    );
+  };
+
+  // Load cart on mount (for authenticated users) - only once
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token && !hasInitialized) {
+      fetchCart();
+    } else if (!token) {
+      // Set empty cart for non-authenticated users
+      setCartItems([]);
+      setSubtotal(0);
+      setItemCount(0);
+      setHasInitialized(true);
+    }
+  }, [hasInitialized]); // Only depend on hasInitialized
+
+  const value = {
+    cartItems,
+    subtotal,
+    itemCount,
+    loading,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    updateCart,
+    fetchCart,
+    getItemQuantity,
+    isInCart,
+    hasInitialized
+  };
 
   return (
-    <CartContext.Provider
-      value={{
-        cart: cartItems,
-        cartCount,
-        cartTotal,
-        isLoading,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
@@ -100,8 +208,8 @@ export const CartProvider = ({ children }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used within CartProvider");
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
   return context;
 };
-
-export default CartContext;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { ToastContainer } from 'react-toastify';
@@ -20,53 +20,75 @@ import Products from './pages/ProductPage';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import AdminDashboard from './pages/Dashboard';
 import CreateProduct from './pages/CreateProduct';
 import ManageProducts from './pages/ManageProducts';
+import ProductDetail from './pages/ProductDetail';
+import Profile from './pages/Profile';
+import Orders from './pages/Orders';
+import NotFound from './pages/NotFound';
 
-// Protected Routes
+// Route Protection
 import ProtectedRoute from './pages/ProtectedRoute';
 import AdminRoute from './pages/AdminRoute';
+
+// Loading component
+import LoadingSpinner from './components/LoadingSpinner';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <Routes>
-            <Route path="/" element={<RootLayout />}>
-              <Route index element={<Home />} />
-              <Route path="about" element={<About />} />
-              <Route path="mission" element={<Mission />} />
-              <Route path="services" element={<Services />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="faq" element={<FAQPage />} />
-              <Route path="products" element={<Products />} />
+          <React.Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {/* Root Layout for all routes */}
+              <Route element={<RootLayout />}>
+                {/* Public Routes */}
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="mission" element={<Mission />} />
+                <Route path="services" element={<Services />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="faq" element={<FAQPage />} />
+                <Route path="products" element={<Products />} />
+                <Route path="products/:id" element={<ProductDetail />} />
+                <Route path="cart" element={<Cart />} /> {/* Moved cart to public routes */}
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<Signup />} />
+                <Route path="forgot-password" element={<ForgotPassword />} />
+                <Route path="reset-password/:token" element={<ResetPassword />} />
+                
+                {/* Protected User Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="orders" element={<Orders />} />
+                </Route>
+              </Route>
+
+              {/* Admin Routes with separate layout */}
               <Route 
-                path="cart" 
+                path="admin" 
                 element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="login" element={<Login />} />
-              <Route path="signup" element={<Signup />} />
-            </Route>
-            
-            <Route 
-              path="admin" 
-              element={
-                <AdminRoute>
-                  <AdminLayout />
-                </AdminRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="products/create" element={<CreateProduct />} />
-              <Route path="products" element={<ManageProducts />} />
-            </Route>
-          </Routes>
+                  <AdminRoute>
+                    <AdminLayout />
+                  </AdminRoute>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="products/create" element={<CreateProduct />} />
+                <Route path="products/edit/:id" element={<CreateProduct />} />
+                <Route path="products" element={<ManageProducts />} />
+              </Route>
+
+              {/* Error Handling */}
+              <Route path="not-found" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="not-found" replace />} />
+            </Routes>
+          </React.Suspense>
+
           <ToastContainer 
             position="top-right"
             autoClose={3000}
@@ -77,6 +99,7 @@ function App() {
             pauseOnFocusLoss
             draggable
             pauseOnHover
+            theme="colored"
           />
         </CartProvider>
       </AuthProvider>

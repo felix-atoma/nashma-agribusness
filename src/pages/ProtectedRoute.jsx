@@ -1,18 +1,24 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, initialLoading } = useAuth();
+  const location = useLocation();
 
-  if (loading) {
-    return <div>Loading...</div>;
+  console.log('ProtectedRoute - user:', user, 'initialLoading:', initialLoading);
+
+  if (initialLoading) {
+    return <LoadingSpinner />;
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    console.log('No user, redirecting to login with state:', { from: location });
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  console.log('User authenticated, rendering children or outlet');
+  return children ? children : <Outlet />;
 };
 
 export default ProtectedRoute;

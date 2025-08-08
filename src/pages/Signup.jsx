@@ -1,133 +1,182 @@
-// Signup.jsx
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { UserPlus, Mail, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import toast from '../utils/toast';
+import AuthFormWrapper from './AuthFormWrapper';
 
-const Signup = () => {
+const Signup = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    passwordConfirm: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signup } = useAuth();
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const [showPassword, setShowPassword] = useState(false);
+  const { signup, loading } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    if (formData.password !== formData.passwordConfirm) {
+      toast.error('Passwords do not match');
       return;
     }
-    
-    setError('');
-    setLoading(true);
-    
-    const { confirmPassword, ...userData } = formData;
-    const result = await signup(userData);
-    
-    if (result.success) {
-      navigate('/'); // Redirect to home after signup
-    } else {
-      setError(result.message);
-      setLoading(false);
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    try {
+      await signup(formData);
+      // Navigation is handled in AuthContext after successful signup
+    } catch (error) {
+      // Error handled in auth provider
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
-      {error && <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="name">
-            Full Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            className="w-full p-2 border rounded"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+    <AuthFormWrapper 
+      title="Create Account" 
+      subtitle="Join us today"
+      icon={UserPlus}
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="First name"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Last name"
+              required
+            />
+          </div>
         </div>
-        
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="email">
-            Email
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
           </label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            className="w-full p-2 border rounded"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
         </div>
-        
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="password">
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            className="w-full p-2 border rounded"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            minLength="6"
-          />
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Create password"
+              minLength="6"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Must be at least 6 characters
+          </p>
         </div>
-        
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
+
+        <div>
+          <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 mb-2">
             Confirm Password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
-            className="w-full p-2 border rounded"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            minLength="6"
-          />
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="password"
+              id="passwordConfirm"
+              name="passwordConfirm"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Confirm password"
+              required
+            />
+          </div>
         </div>
-        
+
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
           disabled={loading}
+          className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
         >
-          {loading ? 'Creating account...' : 'Sign Up'}
+          {loading ? (
+            <>
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              <span>Creating Account...</span>
+            </>
+          ) : (
+            'Create Account'
+          )}
         </button>
       </form>
-      
-      <div className="mt-4 text-center">
-        <p className="text-gray-600">
+
+      <div className="mt-6 text-center">
+        <div className="text-sm text-gray-500">
           Already have an account?{' '}
-          <a href="/login" className="text-blue-500 hover:underline">
-            Login
-          </a>
-        </p>
+          <button
+            onClick={onSwitchToLogin}
+            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            Sign in
+          </button>
+        </div>
       </div>
-    </div>
+    </AuthFormWrapper>
   );
 };
 

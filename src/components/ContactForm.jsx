@@ -46,7 +46,7 @@ const ContactForm = () => {
 
     try {
       // Using your apiClient instead of fetch
-      const response = await apiClient.post("/api/contact", formData);
+      const response = await apiClient.post("/contact", formData);
       
       console.log("Contact form response:", response);
       

@@ -1,194 +1,224 @@
-// src/services/api.js
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://nashma-backend-1-1.onrender.com/api';
 
 class ApiClient {
   constructor() {
     this.token = localStorage.getItem('token');
     this.pendingRequests = new Map();
-    this.abortControllers = new Map();
   }
 
-  async request(endpoint, options = {}, isRetry = false) {
-    // Generate a unique requestKey — skip aborting for /auth/* calls
-    let requestKey = `${options.method || 'GET'}:${endpoint}`;
-    if (endpoint.startsWith('/auth/')) {
-      requestKey += `:${Date.now()}`; // unique so it won't get aborted
-    }
+  async request(endpoint, options = {}) {
+    const controller = new AbortController();
+    const requestKey = `${options.method || 'GET'}:${endpoint}:${JSON.stringify(options.params || {})}`;
 
-    // Cancel previous request for this key (unless it's auth which now has a unique key)
+    // Cancel previous request if it exists
     if (this.pendingRequests.has(requestKey)) {
-      this.abortControllers.get(requestKey)?.abort();
-      this.abortControllers.delete(requestKey);
+      this.pendingRequests.get(requestKey).abort();
+    }
+    this.pendingRequests.set(requestKey, controller);
+
+    // Handle query parameters
+    let url = `${API_BASE_URL}${endpoint}`;
+    if (options.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(options.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.append(key, value);
+        }
+      });
+      if (searchParams.toString()) {
+        url += `?${searchParams.toString()}`;
+      }
     }
 
-    // Create AbortController for this request
-    const abortController = new AbortController();
-    this.abortControllers.set(requestKey, abortController);
-
-    const config = {
-      signal: abortController.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
-        ...options.headers,
-      },
-      ...options,
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(this.token && { Authorization: `Bearer ${this.token}` }),
+      ...options.headers,
     };
 
-    if (config.body && typeof config.body === 'object') {
-      config.body = JSON.stringify(config.body);
-    }
+    const config = {
+      method: options.method || 'GET',
+      headers,
+      signal: controller.signal,
+      ...options,
+      body: options.body && typeof options.body === 'object' 
+        ? JSON.stringify(options.body) 
+        : options.body,
+    };
 
-    const requestPromise = (async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-        const contentType = response.headers.get('content-type');
-        let data;
-
-        if (contentType?.includes('application/json')) {
-          data = await response.json();
-        } else if (contentType?.includes('text/')) {
-          data = await response.text();
-        } else {
-          data = await response.blob();
-        }
-
-        if (!response.ok) {
-          if (response.status === 401 && !isRetry) {
-            // token refresh logic could go here
-          }
-          throw {
-            message: data.message || `Request failed with status ${response.status}`,
-            status: response.status,
-            data
-          };
-        }
-
-        return { data, success: true, status: response.status };
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.log('Request was aborted');
-          return { message: 'Request cancelled', success: false, status: 0 };
-        }
-        console.error('API Error:', error);
-        return {
-          message: error.message || 'Unknown error occurred',
-          success: false,
-          status: error.status,
-          data: error.data
-        };
-      } finally {
-        this.pendingRequests.delete(requestKey);
-        this.abortControllers.delete(requestKey);
+    try {
+      const response = await fetch(url, config);
+      
+      if (!response.ok) {
+        const errorData = await this.parseResponse(response);
+        const error = new Error(errorData.message || `Request failed with status ${response.status}`);
+        error.status = response.status;
+        error.data = errorData;
+        throw error; // This will be caught by React Query as a failed request
       }
-    })();
 
-    this.pendingRequests.set(requestKey, requestPromise);
-    return requestPromise;
+      const data = await this.parseResponse(response);
+      return {
+        data,
+        success: true,
+        status: response.status
+      };
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Request was aborted');
+        // For aborted requests, we can return a cancelled response
+        // but React Query will handle this appropriately
+        throw new Error('Request was cancelled');
+      }
+      
+      console.error('API Error:', error);
+      // Re-throw the error so React Query knows the request failed
+      throw error;
+    } finally {
+      this.pendingRequests.delete(requestKey);
+    }
   }
 
-  // HTTP helpers
-  async get(endpoint, params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const url = query ? `${endpoint}?${query}` : endpoint;
-    return this.request(url);
-  }
-
-  async post(endpoint, data) {
-    return this.request(endpoint, { method: 'POST', body: data });
-  }
-
-  async put(endpoint, data) {
-    return this.request(endpoint, { method: 'PUT', body: data });
-  }
-
-  async patch(endpoint, data) {
-    return this.request(endpoint, { method: 'PATCH', body: data });
-  }
-
-  async delete(endpoint) {
-    return this.request(endpoint, { method: 'DELETE' });
+  async parseResponse(response) {
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      try {
+        return await response.json();
+      } catch (error) {
+        console.error('Failed to parse JSON response:', error);
+        return {};
+      }
+    }
+    return await response.text();
   }
 
   // Auth endpoints
   async signup(userData) {
-    const response = await this.post('/auth/signup', userData);
-    if (response.data?.token) this.setAuthToken(response.data.token);
-    return response;
+    try {
+      const response = await this.request('/auth/signup', {
+        method: 'POST',
+        body: userData
+      });
+      
+      if (response.data?.token) {
+        this.setAuthToken(response.data.token);
+      }
+      return response;
+    } catch (error) {
+      // Handle auth-specific errors if needed
+      throw error;
+    }
   }
 
   async login(credentials) {
-    const response = await this.post('/auth/login', credentials);
-    if (response.data?.token) this.setAuthToken(response.data.token);
-    return response;
+    try {
+      const response = await this.request('/auth/login', {
+        method: 'POST',
+        body: credentials
+      });
+      
+      if (response.data?.token) {
+        this.setAuthToken(response.data.token);
+      }
+      return response;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async logout() {
-    const response = await this.post('/auth/logout', {});
-    this.setAuthToken(null);
-    return response;
-  }
-
-  async forgotPassword(email) {
-    return this.post('/auth/forgot-password', { email });
-  }
-
-  async resetPassword(token, passwords) {
-    return this.patch(`/auth/reset-password/${token}`, passwords);
-  }
-
-  async updatePassword(passwords) {
-    return this.patch('/auth/update-password', passwords);
+    try {
+      const response = await this.request('/auth/logout', {
+        method: 'POST'
+      });
+      this.setAuthToken(null);
+      return response;
+    } catch (error) {
+      // Even if logout fails on server, clear local token
+      this.setAuthToken(null);
+      throw error;
+    }
   }
 
   async getMe() {
-    return this.get('/auth/me');
+    const response = await this.request('/auth/me');
+    
+    // Normalize response structure
+    return {
+      ...response,
+      data: {
+        ...response.data,
+        user: response.data?.data?.user || response.data?.user || response.data
+      }
+    };
+  }
+
+  async forgotPassword(email) {
+    return this.request('/auth/forgot-password', {
+      method: 'POST',
+      body: { email }
+    });
+  }
+
+  async resetPassword(token, passwords) {
+    return this.request(`/auth/reset-password/${token}`, {
+      method: 'PATCH',
+      body: passwords
+    });
+  }
+
+  async updatePassword(passwords) {
+    return this.request('/auth/update-password', {
+      method: 'PATCH',
+      body: passwords
+    });
   }
 
   // Product endpoints
   async getProducts(filters = {}) {
-    return this.get('/products', filters);
+    return this.request('/products', {
+      method: 'GET',
+      params: filters
+    });
   }
 
   async getProduct(id) {
-    return this.get(`/products/${id}`);
+    return this.request(`/products/${id}`);
   }
 
   async getCategories() {
-    return this.get('/products/categories');
-  }
-
-  async getFeaturedProducts() {
-    return this.get('/products/featured');
+    return this.request('/products/categories');
   }
 
   // Cart endpoints
   async getCart() {
-    return this.get('/cart');
+    return this.request('/cart');
   }
 
   async addToCart(productId, quantity = 1) {
-    return this.post('/cart/add', { productId, quantity });
+    return this.request('/cart', {
+      method: 'POST',
+      body: { productId, quantity }
+    });
   }
 
   async removeFromCart(productId) {
-    return this.delete(`/cart/remove/${productId}`);
+    return this.request(`/cart/items/${productId}`, {
+      method: 'DELETE'
+    });
   }
 
-  async updateCartItems(items) {
-    return this.patch('/cart/update', { items });
+  async updateCartItem(productId, quantity) {
+    return this.request(`/cart/items/${productId}`, {
+      method: 'PATCH',
+      body: { quantity }
+    });
   }
 
   async clearCart() {
-    return this.delete('/cart/clear');
-  }
-
-  async applyCoupon(couponCode) {
-    return this.post('/cart/apply-coupon', { couponCode });
-  }
-
-  async removeCoupon() {
-    return this.delete('/cart/remove-coupon');
+    return this.request('/cart/clear', {
+      method: 'DELETE'
+    });
   }
 
   // Utility methods
@@ -201,25 +231,11 @@ class ApiClient {
     }
   }
 
-  cancelRequest(requestKey) {
-    if (this.abortControllers.has(requestKey)) {
-      this.abortControllers.get(requestKey)?.abort();
-      return true;
-    }
-    return false;
-  }
-
-  cancelAllRequests() {
-    this.abortControllers.forEach(controller => controller.abort());
-    this.abortControllers.clear();
+  cancelPendingRequests() {
+    this.pendingRequests.forEach(controller => controller.abort());
     this.pendingRequests.clear();
-  }
-
-  getPendingRequests() {
-    return Array.from(this.pendingRequests.keys());
   }
 }
 
-// Singleton instance
 const apiClient = new ApiClient();
 export default apiClient;

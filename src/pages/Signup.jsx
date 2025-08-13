@@ -58,7 +58,7 @@ const Signup = ({ onSwitchToLogin }) => {
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="First name"
               required
             />
@@ -73,7 +73,7 @@ const Signup = ({ onSwitchToLogin }) => {
               name="lastName"
               value={formData.lastName}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="Last name"
               required
             />
@@ -92,7 +92,7 @@ const Signup = ({ onSwitchToLogin }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="Enter your email"
               required
             />
@@ -111,7 +111,7 @@ const Signup = ({ onSwitchToLogin }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="Create password"
               minLength="6"
               required
@@ -152,7 +152,7 @@ const Signup = ({ onSwitchToLogin }) => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+          className="w-full bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -170,7 +170,7 @@ const Signup = ({ onSwitchToLogin }) => {
           Already have an account?{' '}
           <button
             onClick={onSwitchToLogin}
-            className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+            className="text-green-600 hover:text-green-700 font-medium transition-colors"
           >
             Sign in
           </button>

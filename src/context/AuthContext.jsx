@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
 import toast from '../utils/toast';
@@ -14,227 +14,258 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [authState, setAuthState] = useState({
+    user: null,
+    loading: false,
+    initialized: false,
+    error: null
+  });
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug: Log user state changes
+  // Debug logging
   useEffect(() => {
-    console.log('User state changed:', user);
-  }, [user]);
+    console.log('Auth state updated:', authState);
+  }, [authState]);
 
-  // Initialize authentication state
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      console.log('Checking auth with token:', token);
-      
-      if (token) {
-        try {
-          apiClient.setAuthToken(token);
-          const response = await apiClient.getMe();
-          console.log('getMe response:', response);
-          console.log('getMe response.data:', response.data);
-          console.log('Full response structure:', JSON.stringify(response, null, 2));
-          
-          if (response.success) {
-            console.log('Setting user from getMe:', response.data.user);
-            // Let's also try just response.data in case the structure is different
-            console.log('Trying response.data directly:', response.data);
-            setUser(response.data.user || response.data);
-          } else {
-            console.log('getMe failed, clearing token');
-            localStorage.removeItem('token');
-            apiClient.setAuthToken(null);
-          }
-        } catch (error) {
-          console.log('getMe error:', error);
-          localStorage.removeItem('token');
-          apiClient.setAuthToken(null);
-        }
-      }
-      setInitialLoading(false);
-    };
-
-    checkAuth();
+  // Normalize user data from API responses
+  const normalizeUserData = useCallback((response) => {
+    // Handle multiple possible response structures
+    return response?.data?.data?.user || 
+           response?.data?.user || 
+           response?.user || 
+           response?.data;
   }, []);
 
-  const signup = async (userData) => {
-    if (loading) return;
+  // Initialize authentication state
+  const initializeAuth = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    console.log('Initializing auth with token:', Boolean(token));
     
-    setLoading(true);
+    if (!token) {
+      setAuthState(prev => ({ ...prev, initialized: true }));
+      return;
+    }
+
     try {
-      console.log('Starting signup process...');
-      const response = await apiClient.signup(userData);
-      console.log('Signup response:', response);
+      setAuthState(prev => ({ ...prev, loading: true }));
+      apiClient.setAuthToken(token);
       
+      const response = await apiClient.getMe();
+      console.log('Auth initialization response:', response);
+
       if (response.success) {
-        console.log('Signup successful, setting user and navigating...');
-        setUser(response.data.user);
-        toast.success('Account created successfully!');
+        const userData = normalizeUserData(response);
+        console.log('Normalized user data:', userData);
         
-        // Navigate immediately - don't wait for state update
-        window.location.href = '/cart';
-        return response.data.user;
+        setAuthState({
+          user: userData,
+          loading: false,
+          initialized: true,
+          error: null
+        });
       } else {
-        const errorMessage = response.message || 'Signup failed';
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
+        console.warn('Failed to authenticate with stored token');
+        localStorage.removeItem('token');
+        apiClient.setAuthToken(null);
+        setAuthState({
+          user: null,
+          loading: false,
+          initialized: true,
+          error: response.message
+        });
       }
     } catch (error) {
-      const errorMessage = error.message || 'Signup failed';
-      toast.error(errorMessage);
+      console.error('Auth initialization error:', error);
+      localStorage.removeItem('token');
+      apiClient.setAuthToken(null);
+      setAuthState({
+        user: null,
+        loading: false,
+        initialized: true,
+        error: error.message
+      });
+    }
+  }, [normalizeUserData]);
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  // Handle successful authentication
+  const handleAuthSuccess = useCallback(async (response, successMessage) => {
+    const userData = normalizeUserData(response);
+    const token = response.data?.token;
+
+    if (token) {
+      localStorage.setItem('token', token);
+      apiClient.setAuthToken(token);
+    }
+
+    setAuthState({
+      user: userData,
+      loading: false,
+      initialized: true,
+      error: null
+    });
+
+    if (successMessage) {
+      toast.success(successMessage);
+    }
+
+    return userData;
+  }, [normalizeUserData]);
+
+  // Authentication methods
+  const signup = async (userData) => {
+    if (authState.loading) return;
+    
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      const response = await apiClient.signup(userData);
+      
+      if (response.success) {
+        const userData = await handleAuthSuccess(response, 'Account created successfully!');
+        navigate('/cart', { replace: true });
+        return userData;
+      }
+      
+      throw new Error(response.message || 'Signup failed');
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Signup failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const login = async (credentials) => {
-    if (loading) return;
+    if (authState.loading) return;
     
-    setLoading(true);
     try {
-      console.log('Starting login process...');
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const response = await apiClient.login(credentials);
-      console.log('Login response:', response);
       
       if (response.success) {
-        console.log('Login successful, raw response data:', response.data);
-        console.log('User data from response:', response.data.user);
-        console.log('Full login response structure:', JSON.stringify(response, null, 2));
+        const userData = await handleAuthSuccess(response, 'Login successful!');
         
-        setUser(response.data.user || response.data);
-        
-        // Log the user state immediately after setting it (it will be old state due to async nature)
-        console.log('User state after setUser (will be old):', user);
-        
-        toast.success('Login successful!');
-        
-        // Navigate immediately using window.location to bypass React Router timing issues
-        const from = location.state?.from?.pathname || '/cart';
-        console.log('Navigating to:', from);
-        window.location.href = from;
-        return response.data.user || response.data;
-      } else {
-        const errorMessage = response.message || 'Login failed';
-        toast.error(errorMessage);
-        throw new Error(errorMessage);
+        const redirectTo = location.state?.from?.pathname || '/cart';
+        navigate(redirectTo, { replace: true });
+        return userData;
       }
+      
+      throw new Error(response.message || 'Login failed');
     } catch (error) {
-      const errorMessage = error.message || 'Login failed';
-      toast.error(errorMessage);
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Login failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const logout = async () => {
-    setLoading(true);
     try {
-      const response = await apiClient.logout();
+      setAuthState(prev => ({ ...prev, loading: true }));
+      await apiClient.logout();
       
-      setUser(null);
+      setAuthState({
+        user: null,
+        loading: false,
+        initialized: true,
+        error: null
+      });
+      
       localStorage.removeItem('token');
       apiClient.setAuthToken(null);
-      
-      if (response.success) {
-        toast.success('Logged out successfully');
-      }
-      
+      toast.success('Logged out successfully');
       navigate('/login', { replace: true });
     } catch (error) {
-      setUser(null);
+      setAuthState({
+        user: null,
+        loading: false,
+        initialized: true,
+        error: error.message
+      });
       localStorage.removeItem('token');
       apiClient.setAuthToken(null);
       toast.error('Logout failed');
       navigate('/login', { replace: true });
-    } finally {
-      setLoading(false);
     }
   };
 
   const forgotPassword = async (email) => {
-    setLoading(true);
     try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const response = await apiClient.forgotPassword(email);
       
       if (response.success) {
-        toast.success(response.data.message || 'Reset email sent!');
+        setAuthState(prev => ({ ...prev, loading: false }));
+        toast.success(response.data?.message || 'Password reset email sent');
         return response.data;
-      } else {
-        throw new Error(response.message || 'Failed to send reset email');
       }
+      
+      throw new Error(response.message || 'Failed to send reset email');
     } catch (error) {
-      const errorMessage = error.message || 'Failed to send reset email';
-      toast.error(errorMessage);
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Failed to send reset email');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const resetPassword = async (token, passwords) => {
-    setLoading(true);
     try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const response = await apiClient.resetPassword(token, passwords);
       
       if (response.success) {
-        setUser(response.data.user);
-        toast.success('Password reset successful!');
-        
-        window.location.href = '/cart';
-        return response.data.user;
-      } else {
-        throw new Error(response.message || 'Password reset failed');
+        const userData = await handleAuthSuccess(response, 'Password reset successfully!');
+        navigate('/cart', { replace: true });
+        return userData;
       }
+      
+      throw new Error(response.message || 'Password reset failed');
     } catch (error) {
-      const errorMessage = error.message || 'Password reset failed';
-      toast.error(errorMessage);
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Password reset failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const updatePassword = async (passwords) => {
-    setLoading(true);
     try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
       const response = await apiClient.updatePassword(passwords);
       
       if (response.success) {
+        setAuthState(prev => ({ ...prev, loading: false }));
         toast.success('Password updated successfully!');
         return response.data;
-      } else {
-        throw new Error(response.message || 'Password update failed');
       }
+      
+      throw new Error(response.message || 'Password update failed');
     } catch (error) {
-      const errorMessage = error.message || 'Password update failed';
-      toast.error(errorMessage);
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Password update failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  const value = {
-    user,
-    loading,
-    initialLoading,
+  // Memoized context value
+  const contextValue = useMemo(() => ({
+    user: authState.user,
+    loading: authState.loading,
+    initialized: authState.initialized,
+    error: authState.error,
     signup,
     login,
     logout,
     forgotPassword,
     resetPassword,
     updatePassword,
-  };
+    isAuthenticated: !!authState.user
+  }), [authState]);
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

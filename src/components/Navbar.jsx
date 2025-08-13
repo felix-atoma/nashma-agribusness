@@ -4,7 +4,6 @@ import { FaPhoneAlt, FaBars, FaTimes } from "react-icons/fa";
 import { ShoppingCart, User, LogOut } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
-import CartIcon from '../pages/CartIcon'
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -17,12 +16,13 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Add safety checks
-  const safeCart = cart || { itemCount: 0, items: [] };
+  // Add safety checks and improved cart handling
+  const safeCart = cart || { itemCount: 0, items: [], total: 0 };
   const safeUser = user || {};
   const isAuthenticated = user !== null && user !== undefined;
+  const cartItemCount = safeCart.itemCount || safeCart.items?.length || 0;
 
-  console.log('Navbar - user:', user, 'cart:', cart); // Debug log
+  console.log('Navbar - user:', user, 'cart:', cart, 'itemCount:', cartItemCount); // Debug log
 
   useEffect(() => {
     const handleResize = () => setIsSmallScreen(window.innerWidth <= 768);
@@ -60,10 +60,13 @@ const Navbar = () => {
       navigate("/login", {
         state: {
           from: "cart",
+          returnTo: "/cart",
           message: "Please login to view your cart",
         },
       });
+      return;
     }
+    // If authenticated, navigation will proceed normally via Link
   };
 
   const handleLogout = () => {
@@ -72,6 +75,19 @@ const Navbar = () => {
   };
 
   const menuItems = ["Home", "About", "Services", "Products", "Contact"];
+
+  // Custom Cart Icon Component
+  const CartIconWithBadge = ({ className = "", showText = false }) => (
+    <div className="relative">
+      <ShoppingCart className={`w-5 h-5 ${className}`} />
+      {cartItemCount > 0 && (
+        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] text-[10px]">
+          {cartItemCount > 99 ? "99+" : cartItemCount}
+        </span>
+      )}
+      {showText && <span className="ml-2">Cart</span>}
+    </div>
+  );
 
   return (
     <>
@@ -138,8 +154,12 @@ const Navbar = () => {
 
             {/* Cart Icon */}
             <li className="relative">
-              <Link to="/cart" onClick={handleCartClick} className="p-2">
-                <CartIcon />
+              <Link 
+                to="/cart" 
+                onClick={handleCartClick} 
+                className="flex items-center p-2 text-green-600 hover:text-green-800 transition-colors"
+              >
+                <CartIconWithBadge />
               </Link>
             </li>
 
@@ -329,15 +349,7 @@ const Navbar = () => {
               }}
               className="flex items-center justify-between text-green-600 hover:text-green-800 hover:bg-green-50 font-bold text-lg p-4 transition-colors"
             >
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="w-5 h-5" />
-                <span>Cart</span>
-              </div>
-              {safeCart.itemCount > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                  {safeCart.itemCount > 99 ? "99+" : safeCart.itemCount}
-                </span>
-              )}
+              <CartIconWithBadge showText={true} />
             </Link>
           </li>
 

@@ -12,9 +12,9 @@ const ProductDetail = () => {
   const [wishlist, setWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   
-  // Fixed query with stable queryFn
+  // Fixed query to handle API response structure
   const { 
-    data: product, 
+    data: response, 
     isLoading, 
     isError, 
     error,
@@ -28,6 +28,9 @@ const ProductDetail = () => {
     refetchOnWindowFocus: false,
     enabled: !!id,
   });
+
+  // Extract product data from response
+  const product = response?.data || response;
 
   // Reset selected image when product changes
   useEffect(() => {

@@ -13,7 +13,7 @@ import AdminLayout from './layouts/AdminLayout';
 // Pages
 import Home from './pages/Home';
 import About from './pages/About';
-import Services from './pages/Services';
+import Services from './pages/services';
 import Contact from './pages/Contact';
 import Mission from './pages/Mission';
 import FAQPage from './pages/FAQPage';

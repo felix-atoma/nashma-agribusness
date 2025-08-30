@@ -1,7 +1,7 @@
 // utils/apiClient.js
 // Use env var if available, otherwise fallback to localhost:5000
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000/api";
+  import.meta.env.VITE_API_BASE_URL?.trim() || "https://nashma-backend-1-1.onrender.com/api";
 
 class ApiClient {
   constructor() {

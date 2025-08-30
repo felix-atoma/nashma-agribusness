@@ -45,12 +45,12 @@ const ContactForm = () => {
     setIsSending(true);
 
     try {
-      // Using your apiClient instead of fetch
-      const response = await apiClient.post("/contact", formData);
+      // Use the correct method from apiClient
+      const response = await apiClient.sendContactMessage(formData);
       
       console.log("Contact form response:", response);
       
-      toast.success(response.message || "Your message has been sent successfully!");
+      toast.success(response.data?.message || "Your message has been sent successfully!");
       
       // Reset form
       setFormData({

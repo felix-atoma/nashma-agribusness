@@ -1,3 +1,4 @@
+// AuthContext.jsx - Fixed to work with your existing apiClient
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
@@ -123,16 +124,19 @@ export const AuthProvider = ({ children }) => {
     
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      console.log('Calling apiClient.signup with:', userData);
       const response = await apiClient.signup(userData);
       
       if (response.success) {
-        const userData = await handleAuthSuccess(response, 'Account created successfully!');
+        const user = await handleAuthSuccess(response, 'Account created successfully!');
         navigate('/cart', { replace: true });
-        return userData;
+        return user;
       }
       
       throw new Error(response.message || 'Signup failed');
     } catch (error) {
+      console.error('Signup error:', error);
       setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
       toast.error(error.message || 'Signup failed');
       throw error;
@@ -144,18 +148,21 @@ export const AuthProvider = ({ children }) => {
     
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      console.log('Calling apiClient.login with:', credentials);
       const response = await apiClient.login(credentials);
       
       if (response.success) {
-        const userData = await handleAuthSuccess(response, 'Login successful!');
+        const user = await handleAuthSuccess(response, 'Login successful!');
         
         const redirectTo = location.state?.from?.pathname || '/cart';
         navigate(redirectTo, { replace: true });
-        return userData;
+        return user;
       }
       
       throw new Error(response.message || 'Login failed');
     } catch (error) {
+      console.error('Login error:', error);
       setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
       toast.error(error.message || 'Login failed');
       throw error;
@@ -165,8 +172,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true }));
-      await apiClient.logout();
       
+      // Call your apiClient logout method
+      const logoutResult = await apiClient.logout();
+      
+      // Clear local state regardless of server response
       setAuthState({
         user: null,
         loading: false,
@@ -174,20 +184,25 @@ export const AuthProvider = ({ children }) => {
         error: null
       });
       
-      localStorage.removeItem('token');
-      apiClient.setAuthToken(null);
-      toast.success('Logged out successfully');
+      toast.success(logoutResult.message || 'Logged out successfully');
       navigate('/login', { replace: true });
+      
     } catch (error) {
+      console.error('Logout error:', error);
+      
+      // Still clear local state as fallback
       setAuthState({
         user: null,
         loading: false,
         initialized: true,
-        error: error.message
+        error: null
       });
+      
+      // Force cleanup in case something went wrong
       localStorage.removeItem('token');
       apiClient.setAuthToken(null);
-      toast.error('Logout failed');
+      
+      toast.success('Logged out successfully');
       navigate('/login', { replace: true });
     }
   };
@@ -195,7 +210,12 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (email) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      const response = await apiClient.forgotPassword(email);
+      
+      // Use the request method directly since forgotPassword might not be implemented
+      const response = await apiClient.request('/auth/forgot-password', {
+        method: 'POST',
+        body: { email }
+      });
       
       if (response.success) {
         setAuthState(prev => ({ ...prev, loading: false }));
@@ -214,7 +234,11 @@ export const AuthProvider = ({ children }) => {
   const resetPassword = async (token, passwords) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      const response = await apiClient.resetPassword(token, passwords);
+      
+      const response = await apiClient.request(`/auth/reset-password/${token}`, {
+        method: 'POST',
+        body: passwords
+      });
       
       if (response.success) {
         const userData = await handleAuthSuccess(response, 'Password reset successfully!');
@@ -233,7 +257,11 @@ export const AuthProvider = ({ children }) => {
   const updatePassword = async (passwords) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      const response = await apiClient.updatePassword(passwords);
+      
+      const response = await apiClient.request('/auth/update-password', {
+        method: 'PATCH',
+        body: passwords
+      });
       
       if (response.success) {
         setAuthState(prev => ({ ...prev, loading: false }));

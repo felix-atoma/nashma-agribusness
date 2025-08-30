@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { OrderProvider } from './context/OrderContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -29,6 +30,8 @@ import ProductDetail from './pages/ProductDetail';
 import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderSuccessPage from './pages/OrderSuccessPage'; // ✅ Import the new page
 
 // Route Protection
 import ProtectedRoute from './pages/ProtectedRoute';
@@ -42,65 +45,69 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <React.Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              {/* Root Layout for all routes */}
-              <Route element={<RootLayout />}>
-                {/* Public Routes */}
-                <Route index element={<Home />} />
-                <Route path="about" element={<About />} />
-                <Route path="mission" element={<Mission />} />
-                <Route path="services" element={<Services />} />
-                <Route path="contact" element={<Contact />} />
-                <Route path="faq" element={<FAQPage />} />
-                <Route path="products" element={<Products />} />
-                <Route path="products/:id" element={<ProductDetail />} />
-                <Route path="cart" element={<Cart />} /> {/* Moved cart to public routes */}
-                <Route path="login" element={<Login />} />
-                <Route path="signup" element={<Signup />} />
-                <Route path="forgot-password" element={<ForgotPassword />} />
-                <Route path="reset-password/:token" element={<ResetPassword />} />
-                
-                {/* Protected User Routes */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="profile" element={<Profile />} />
-                  <Route path="orders" element={<Orders />} />
+          <OrderProvider>
+            <React.Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                {/* Root Layout for all routes */}
+                <Route element={<RootLayout />}>
+                  {/* Public Routes */}
+                  <Route index element={<Home />} />
+                  <Route path="about" element={<About />} />
+                  <Route path="mission" element={<Mission />} />
+                  <Route path="services" element={<Services />} />
+                  <Route path="contact" element={<Contact />} />
+                  <Route path="faq" element={<FAQPage />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="products/:id" element={<ProductDetail />} />
+                  <Route path="cart" element={<Cart />} />
+                  <Route path="login" element={<Login />} />
+                  <Route path="signup" element={<Signup />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                  <Route path="reset-password/:token" element={<ResetPassword />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/order-success" element={<OrderSuccessPage />} /> {/* ✅ Add Order Success route */}
+
+                  {/* Protected User Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="orders" element={<Orders />} />
+                  </Route>
                 </Route>
-              </Route>
 
-              {/* Admin Routes with separate layout */}
-              <Route 
-                path="admin" 
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                }
-              >
-                <Route index element={<AdminDashboard />} />
-                <Route path="products/create" element={<CreateProduct />} />
-                <Route path="products/edit/:id" element={<CreateProduct />} />
-                <Route path="products" element={<ManageProducts />} />
-              </Route>
+                {/* Admin Routes with separate layout */}
+                <Route 
+                  path="admin" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout />
+                    </AdminRoute>
+                  }
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="products/create" element={<CreateProduct />} />
+                  <Route path="products/edit/:id" element={<CreateProduct />} />
+                  <Route path="products" element={<ManageProducts />} />
+                </Route>
 
-              {/* Error Handling */}
-              <Route path="not-found" element={<NotFound />} />
-              <Route path="*" element={<Navigate to="not-found" replace />} />
-            </Routes>
-          </React.Suspense>
+                {/* Error Handling */}
+                <Route path="not-found" element={<NotFound />} />
+                <Route path="*" element={<Navigate to="not-found" replace />} />
+              </Routes>
+            </React.Suspense>
 
-          <ToastContainer 
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="colored"
-          />
+            <ToastContainer 
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
+          </OrderProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

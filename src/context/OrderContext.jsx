@@ -84,7 +84,7 @@ export const OrderProvider = ({ children }) => {
       setOrders([]);
       setError(null);
     }
-  }, [initialized, isAuthenticated, user]);
+  }, [initialized, isAuthenticated, user, fetchUserOrders]);
 
   const placeOrder = async (orderData) => {
     setError(null);
@@ -133,29 +133,80 @@ export const OrderProvider = ({ children }) => {
 
       const response = await apiClient.createOrder(formattedOrderData);
       
+      console.log('Order creation response:', response);
+      
       if (!response.success) {
         throw new Error(response.message || response.data?.message || "Failed to place order");
       }
 
-      const newOrder = response.data.order || response.data;
+      // Extract order data from different possible response structures
+      const newOrder = response.data?.order || response.data || response;
       
       // Add the new order to the beginning of the list
-      setOrders(prev => [newOrder, ...prev]);
+      if (newOrder) {
+        setOrders(prev => [newOrder, ...prev]);
+      }
 
-      if (clearCart) {
+      // Don't clear cart immediately for Paystack payments - wait for payment confirmation
+      if (orderData.paymentMethod === 'cod' && clearCart) {
         clearCart();
       }
 
-      // Update toast to success
-      toast.update(loadingToast, {
-        render: 'Order placed successfully!',
-        type: 'success',
-        isLoading: false,
-        autoClose: 3000,
-        position: 'bottom-right'
-      });
+      // Handle payment response - check for paymentRequired in different response structures
+      const paymentRequired = response.paymentRequired || 
+                             response.data?.paymentRequired || 
+                             (response.data?.data && response.data.data.paymentRequired);
+      
+      const paymentUrl = response.paymentUrl || 
+                         response.data?.paymentUrl || 
+                         (response.data?.data && response.data.data.paymentUrl);
+      
+      const reference = response.reference || 
+                        response.data?.reference || 
+                        (response.data?.data && response.data.data.reference);
 
-      return newOrder;
+      // Update toast based on payment method
+      if (paymentRequired) {
+        toast.update(loadingToast, {
+          render: 'Order created. Redirecting to payment...',
+          type: 'info',
+          isLoading: false,
+          autoClose: 3000,
+          position: 'bottom-right'
+        });
+        
+        // Return the full response including payment details
+        return {
+          success: true,
+          paymentRequired: true,
+          paymentUrl: paymentUrl,
+          reference: reference,
+          data: {
+            order: newOrder
+          }
+        };
+      } else {
+        // For COD orders, clear cart and show success
+        if (clearCart) {
+          clearCart();
+        }
+        
+        toast.update(loadingToast, {
+          render: 'Order placed successfully!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 3000,
+          position: 'bottom-right'
+        });
+
+        return {
+          success: true,
+          paymentRequired: false,
+          data: {
+            order: newOrder
+          }
+        };
+      }
 
     } catch (error) {
       console.error('Order placement failed:', error);
@@ -163,12 +214,71 @@ export const OrderProvider = ({ children }) => {
       
       if (error.response) {
         errorMsg = error.response.data?.message || error.response.data?.error || errorMsg;
+      } else if (error.data) {
+        errorMsg = error.data.message || error.data.error || errorMsg;
       }
       
       setError(errorMsg);
       
       // Show error toast
       toast.error(`Order failed: ${errorMsg}`, {
+        autoClose: 4000,
+        position: 'bottom-right'
+      });
+      
+      throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelOrder = async (orderId) => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading('Cancelling order...', {
+        position: 'bottom-right'
+      });
+
+      const response = await apiClient.updateOrderStatus(orderId, 'cancelled');
+      
+      if (response.success) {
+        // Update the orders state
+        setOrders(prev => 
+          prev.map(order => 
+            order._id === orderId 
+              ? { ...order, status: 'cancelled' } 
+              : order
+          )
+        );
+        
+        toast.update(loadingToast, {
+          render: 'Order cancelled successfully!',
+          type: 'success',
+          isLoading: false,
+          autoClose: 3000,
+          position: 'bottom-right'
+        });
+        
+        return { success: true };
+      } else {
+        throw new Error(response.message || 'Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Order cancellation failed:', error);
+      let errorMsg = error.message || "An unexpected error occurred";
+      
+      if (error.response) {
+        errorMsg = error.response.data?.message || error.response.data?.error || errorMsg;
+      } else if (error.data) {
+        errorMsg = error.data.message || error.data.error || errorMsg;
+      }
+      
+      setError(errorMsg);
+      
+      toast.error(`Cancellation failed: ${errorMsg}`, {
         autoClose: 4000,
         position: 'bottom-right'
       });
@@ -198,6 +308,7 @@ export const OrderProvider = ({ children }) => {
   const value = {
     orders,
     placeOrder,
+    cancelOrder,
     loading,
     error,
     getOrderById,

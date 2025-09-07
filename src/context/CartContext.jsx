@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+// context/CartContext.js
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import apiClient from '../utils/apiClient';
 import toast from '../utils/toast';
 import { useAuth } from './AuthContext';
@@ -28,7 +29,6 @@ const calculateCartTotals = (cartData) => {
     return defaultCart;
   }
 
-  // Handle different possible structures
   let items = [];
   
   if (Array.isArray(cartData.items) && cartData.items.length > 0) {
@@ -61,17 +61,68 @@ const calculateCartTotals = (cartData) => {
   };
 };
 
+// Helper to create optimistic cart updates
+const createOptimisticUpdate = (currentCart, updateFn) => {
+  try {
+    return calculateCartTotals(updateFn(currentCart));
+  } catch (error) {
+    console.error('Error creating optimistic update:', error);
+    return currentCart;
+  }
+};
+
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [cart, setCart] = useState(defaultCart);
   const [isLoading, setIsLoading] = useState(false);
   const [operationInProgress, setOperationInProgress] = useState(null);
+  const operationTimeoutRef = useRef(null);
+  const isInitializedRef = useRef(false);
 
-  // Add retry logic for fetching cart
+  // Cleanup operation timeout
+  const clearOperationTimeout = useCallback(() => {
+    if (operationTimeoutRef.current) {
+      clearTimeout(operationTimeoutRef.current);
+      operationTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Set operation with timeout to prevent stuck states
+  const setOperationWithTimeout = useCallback((operation) => {
+    clearOperationTimeout();
+    setOperationInProgress(operation);
+    
+    // Clear operation after 10 seconds to prevent stuck states
+    operationTimeoutRef.current = setTimeout(() => {
+      console.warn(`Operation ${operation} timed out, clearing...`);
+      setOperationInProgress(null);
+    }, 10000);
+  }, [clearOperationTimeout]);
+
+  // Clear operation and timeout
+  const clearOperation = useCallback(() => {
+    clearOperationTimeout();
+    setOperationInProgress(null);
+  }, [clearOperationTimeout]);
+
+  // Optimized cart update function
+  const updateCartState = useCallback((newCartData) => {
+    const calculatedCart = calculateCartTotals(newCartData);
+    setCart(prevCart => {
+      // Only update if there's actually a change
+      if (JSON.stringify(prevCart) !== JSON.stringify(calculatedCart)) {
+        return calculatedCart;
+      }
+      return prevCart;
+    });
+    return calculatedCart;
+  }, []);
+
+  // Fetch cart with retry logic
   const fetchCartWithRetry = useCallback(async (retryCount = 0) => {
     if (!user) {
       setCart(defaultCart);
-      return;
+      return defaultCart;
     }
 
     setIsLoading(true);
@@ -90,8 +141,14 @@ export const CartProvider = ({ children }) => {
         cartData = defaultCart;
       }
       
-      const calculatedCart = calculateCartTotals(cartData);
-      setCart(calculatedCart);
+      const calculatedCart = updateCartState(cartData);
+      
+      // Log for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Cart fetched successfully:', calculatedCart);
+      }
+      
+      return calculatedCart;
     } catch (error) {
       // Retry once if request was cancelled
       if (error.message === 'Request was cancelled' && retryCount === 0) {
@@ -108,24 +165,25 @@ export const CartProvider = ({ children }) => {
       if (error.message !== 'Request was cancelled') {
         setCart(defaultCart);
       }
+      
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, updateCartState]);
 
   const fetchCart = useCallback(() => fetchCartWithRetry(0), [fetchCartWithRetry]);
 
-  const [isInitialized, setIsInitialized] = useState(false);
-
+  // Initialize cart when user changes
   useEffect(() => {
-    if (user && !isInitialized) {
-      fetchCart();
-      setIsInitialized(true);
-    } else if (!user && isInitialized) {
+    if (user && !isInitializedRef.current) {
+      fetchCart().catch(console.error);
+      isInitializedRef.current = true;
+    } else if (!user) {
       setCart(defaultCart);
-      setIsInitialized(false);
+      isInitializedRef.current = false;
     }
-  }, [user, isInitialized, fetchCart]);
+  }, [user, fetchCart]);
 
   const addToCart = useCallback(
     async (productOrItems, quantity = 1) => {
@@ -138,36 +196,21 @@ export const CartProvider = ({ children }) => {
         return false;
       }
 
-      setOperationInProgress("addToCart");
+      setOperationWithTimeout("addToCart");
+
+      // Store original cart for rollback
+      const originalCart = { ...cart };
 
       try {
         // Case 1: Bulk add (array of items)
         if (Array.isArray(productOrItems)) {
-          // Optimistic update
-          setCart((prevCart) => {
-            const updatedItems = [...prevCart.items];
-            productOrItems.forEach(({ productId, quantity }) => {
-              const existing = updatedItems.find(
-                (item) =>
-                  item.product?._id === productId || item.productId === productId
-              );
-              if (existing) {
-                existing.quantity += quantity;
-              } else {
-                updatedItems.push({ productId, quantity });
-              }
-            });
-            return calculateCartTotals({ ...prevCart, items: updatedItems });
-          });
-
-          // Call backend
           await apiClient.addManyToCart(productOrItems);
           await fetchCart();
           toast.success("Items added to cart!");
           return true;
         }
 
-        // Case 2: Single product
+        // Case 2: Single product - Create optimistic update
         let productId;
         let productObj;
 
@@ -183,44 +226,50 @@ export const CartProvider = ({ children }) => {
         }
 
         // Optimistic update
-        setCart((prevCart) => {
-          const existing = prevCart.items.find(
-            (item) =>
-              item.product?._id === productId || item.productId === productId
+        const optimisticCart = createOptimisticUpdate(cart, (currentCart) => {
+          const existingItemIndex = currentCart.items.findIndex(item => 
+            (item.product?._id || item.productId) === productId
           );
-
-          let updatedItems;
-          if (existing) {
-            updatedItems = prevCart.items.map((item) =>
-              item.product?._id === productId || item.productId === productId
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            );
+          
+          const newItems = [...currentCart.items];
+          if (existingItemIndex >= 0) {
+            newItems[existingItemIndex] = {
+              ...newItems[existingItemIndex],
+              quantity: newItems[existingItemIndex].quantity + quantity
+            };
           } else {
-            updatedItems = [
-              ...prevCart.items,
-              { product: productObj, productId, quantity },
-            ];
+            newItems.push({
+              productId,
+              product: productObj,
+              quantity,
+              price: productObj.price || 0
+            });
           }
-
-          return calculateCartTotals({ ...prevCart, items: updatedItems });
+          
+          return { ...currentCart, items: newItems };
         });
 
-        // Call backend
+        setCart(optimisticCart);
+
+        // API call
         await apiClient.addToCart(productId, quantity);
+        
+        // Fetch fresh data to ensure sync
         await fetchCart();
+        
         toast.success("Item added to cart!");
         return true;
       } catch (error) {
+        // Rollback on error
+        setCart(originalCart);
         console.error("Add to cart error:", error);
-        await fetchCart();
         toast.error(error.message || "Failed to add item(s) to cart");
         return false;
       } finally {
-        setOperationInProgress(null);
+        clearOperation();
       }
     },
-    [user, operationInProgress, fetchCart]
+    [user, operationInProgress, cart, fetchCart, setOperationWithTimeout, clearOperation]
   );
 
   const removeFromCart = useCallback(
@@ -238,86 +287,92 @@ export const CartProvider = ({ children }) => {
         return false;
       }
 
-      setOperationInProgress("removeFromCart");
+      setOperationWithTimeout(`removeFromCart-${productId}`);
       
-      // Store original cart state for rollback
+      // Store original cart for rollback
       const originalCart = { ...cart };
-      
+
       try {
         // Optimistic update - remove item immediately
-        setCart((prevCart) => {
-          const updatedItems = prevCart.items.filter(
-            (item) => {
-              const itemProductId = item.product?._id || item.productId;
-              return itemProductId !== productId;
-            }
-          );
-          return calculateCartTotals({ ...prevCart, items: updatedItems });
-        });
+        const optimisticCart = createOptimisticUpdate(cart, (currentCart) => ({
+          ...currentCart,
+          items: currentCart.items.filter(item => {
+            const itemId = item.product?._id || item.productId;
+            return itemId !== productId;
+          })
+        }));
 
-        // Call backend API
+        setCart(optimisticCart);
+
+        // API call
         await apiClient.removeFromCart(productId);
         
-        // Fetch fresh cart data to ensure consistency
+        // Fetch fresh data to ensure sync
         await fetchCart();
         
         toast.success("Item removed from cart");
         return true;
       } catch (error) {
+        // Rollback on error
+        setCart(originalCart);
         console.error("Remove from cart error:", error);
         
-        // Rollback optimistic update on error
-        setCart(originalCart);
-        
-        // Only show error if it's not an "item not found" error
-        // since that means the item was already removed
+        // Handle specific error cases
         if (error.status !== 404) {
           toast.error(error.message || "Failed to remove item from cart");
         } else {
-          // Item was already removed, just sync the cart
+          // Item was already removed, keep the optimistic update
           await fetchCart();
           toast.success("Item removed from cart");
           return true;
         }
         return false;
       } finally {
-        setOperationInProgress(null);
+        clearOperation();
       }
     },
-    [user, operationInProgress, fetchCart, cart]
+    [user, operationInProgress, cart, fetchCart, setOperationWithTimeout, clearOperation]
   );
 
-  const updateCartItem = useCallback(
+  const updateQuantity = useCallback(
     async (productId, quantity) => {
       if (!user || operationInProgress) return false;
 
-      setOperationInProgress('updateCartItem');
+      setOperationWithTimeout(`updateQuantity-${productId}`);
       
-      // Store original cart state for rollback
+      // Store original cart for rollback
       const originalCart = { ...cart };
-      
+
       try {
+        if (quantity <= 0) {
+          // If quantity is 0 or negative, remove the item
+          return await removeFromCart(productId);
+        }
+
         // Optimistic update
-        setCart((prevCart) => {
-          const updatedItems = prevCart.items.map((item) => {
-            const itemProductId = item.product?._id || item.productId;
-            return itemProductId === productId
+        const optimisticCart = createOptimisticUpdate(cart, (currentCart) => ({
+          ...currentCart,
+          items: currentCart.items.map(item => {
+            const itemId = item.product?._id || item.productId;
+            return itemId === productId
               ? { ...item, quantity }
               : item;
-          }).filter(item => item.quantity > 0); // Remove items with 0 quantity
-          
-          return calculateCartTotals({ ...prevCart, items: updatedItems });
-        });
+          })
+        }));
 
+        setCart(optimisticCart);
+
+        // API call
         await apiClient.updateCartItem(productId, quantity);
+        
+        // Fetch fresh data to ensure sync
         await fetchCart();
-        toast.success('Cart item updated successfully!');
+        
         return true;
       } catch (error) {
-        console.error('Update cart item error:', error);
-        
-        // Rollback optimistic update on error
+        // Rollback on error
         setCart(originalCart);
+        console.error('Update cart item error:', error);
         
         // Handle specific error cases
         if (error.status === 404) {
@@ -330,42 +385,42 @@ export const CartProvider = ({ children }) => {
         toast.error(error.message || 'Failed to update cart item');
         return false;
       } finally {
-        setOperationInProgress(null);
+        clearOperation();
       }
     },
-    [user, operationInProgress, fetchCart, cart]
+    [user, operationInProgress, cart, fetchCart, setOperationWithTimeout, clearOperation, removeFromCart]
   );
 
   const updateCartItems = useCallback(
     async (items) => {
       if (!user || operationInProgress) return false;
 
-      setOperationInProgress('updateCart');
+      setOperationWithTimeout('updateCart');
       
-      // Store original cart state for rollback
+      // Store original cart for rollback
       const originalCart = { ...cart };
-      
+
       try {
         // Optimistic update
-        setCart((prevCart) => {
-          const updatedItems = prevCart.items.map(cartItem => {
-            const itemProductId = cartItem.product?._id || cartItem.productId;
-            const update = items.find(item => item.productId === itemProductId);
-            return update ? { ...cartItem, quantity: update.quantity } : cartItem;
-          }).filter(item => item.quantity > 0); // Remove items with 0 quantity
-          
-          return calculateCartTotals({ ...prevCart, items: updatedItems });
-        });
+        const optimisticCart = createOptimisticUpdate(cart, (currentCart) => ({
+          ...currentCart,
+          items: items
+        }));
 
+        setCart(optimisticCart);
+
+        // API call
         await apiClient.updateCartItems(items);
+        
+        // Fetch fresh data to ensure sync
         await fetchCart();
+        
         toast.success('Cart updated successfully!');
         return true;
       } catch (error) {
-        console.error('Update cart items error:', error);
-        
-        // Rollback optimistic update on error
+        // Rollback on error
         setCart(originalCart);
+        console.error('Update cart items error:', error);
         
         // Handle specific error cases
         if (error.status === 404) {
@@ -378,81 +433,99 @@ export const CartProvider = ({ children }) => {
         toast.error(error.message || 'Failed to update cart');
         return false;
       } finally {
-        setOperationInProgress(null);
+        clearOperation();
       }
     },
-    [user, operationInProgress, fetchCart, cart]
+    [user, operationInProgress, cart, fetchCart, setOperationWithTimeout, clearOperation]
   );
 
   const clearCart = useCallback(async () => {
     if (!user || operationInProgress) return false;
 
-    setOperationInProgress('clearCart');
+    setOperationWithTimeout('clearCart');
     
-    // Store original cart state for rollback
+    // Store original cart for rollback
     const originalCart = { ...cart };
-    
+
     try {
-      // Optimistic update
+      // Optimistic update - immediately clear the cart
       setCart(defaultCart);
-      
+
+      // API call
       await apiClient.clearCart();
+      
       toast.success('Cart cleared');
       return true;
     } catch (error) {
-      console.error('Clear cart error:', error);
-      
-      // Rollback optimistic update on error
+      // Rollback on error
       setCart(originalCart);
-      
-      await fetchCart();
+      console.error('Clear cart error:', error);
       toast.error(error.message || 'Failed to clear cart');
       return false;
     } finally {
-      setOperationInProgress(null);
+      clearOperation();
     }
-  }, [user, operationInProgress, fetchCart, cart]);
+  }, [user, operationInProgress, cart, setOperationWithTimeout, clearOperation]);
 
   const applyCoupon = useCallback(
     async (code) => {
       if (!user || operationInProgress) return false;
 
-      setOperationInProgress('applyCoupon');
+      setOperationWithTimeout('applyCoupon');
+      
+      // Store original cart for rollback
+      const originalCart = { ...cart };
+
       try {
         const response = await apiClient.applyCoupon(code);
         const cartData = response?.data?.cart || response?.data || defaultCart;
-        setCart(calculateCartTotals(cartData));
+        updateCartState(cartData);
         toast.success('Coupon applied successfully!');
         return true;
       } catch (error) {
+        // Rollback on error
+        setCart(originalCart);
         console.error('Apply coupon error:', error);
         toast.error(error.message || 'Invalid coupon code');
         return false;
       } finally {
-        setOperationInProgress(null);
+        clearOperation();
       }
     },
-    [user, operationInProgress]
+    [user, operationInProgress, cart, updateCartState, setOperationWithTimeout, clearOperation]
   );
 
   const removeCoupon = useCallback(async () => {
     if (!user || operationInProgress) return false;
 
-    setOperationInProgress('removeCoupon');
+    setOperationWithTimeout('removeCoupon');
+    
+    // Store original cart for rollback
+    const originalCart = { ...cart };
+
     try {
       const response = await apiClient.removeCoupon();
       const cartData = response?.data?.cart || response?.data || defaultCart;
-      setCart(calculateCartTotals(cartData));
+      updateCartState(cartData);
       toast.success('Coupon removed');
       return true;
     } catch (error) {
+      // Rollback on error
+      setCart(originalCart);
       console.error('Remove coupon error:', error);
       toast.error(error.message || 'Failed to remove coupon');
       return false;
     } finally {
-      setOperationInProgress(null);
+      clearOperation();
     }
-  }, [user, operationInProgress]);
+  }, [user, operationInProgress, cart, updateCartState, setOperationWithTimeout, clearOperation]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      clearOperationTimeout();
+    };
+  }, [clearOperationTimeout]);
 
   const value = {
     cart,
@@ -462,7 +535,7 @@ export const CartProvider = ({ children }) => {
     operationInProgress,
     addToCart,
     removeFromCart,
-    updateCartItem,
+    updateQuantity,
     updateCartItems,
     applyCoupon,
     removeCoupon,

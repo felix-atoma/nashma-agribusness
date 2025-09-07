@@ -1,9 +1,15 @@
+// components/CartSummary.jsx
 import React from 'react';
-import { useCart } from '../context/CartContext'
+import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 
 const CartSummary = () => {
   const { cart, removeCoupon } = useCart();
+
+  // Add this useEffect to debug and verify cart updates
+  React.useEffect(() => {
+    console.log('CartSummary: Cart updated', cart);
+  }, [cart]);
 
   return (
     <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -23,7 +29,7 @@ const CartSummary = () => {
             </div>
             <div className="flex justify-between items-center bg-green-50 px-3 py-2 rounded-lg">
               <span className="text-sm font-medium text-green-800">
-                {cart.coupon.code}
+                {cart.coupon?.code}
               </span>
               <button 
                 onClick={removeCoupon}

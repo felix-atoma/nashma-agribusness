@@ -1,5 +1,7 @@
+// App.js
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { OrderProvider } from './context/OrderContext';
@@ -9,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // Layouts
 import RootLayout from './layouts/RootLayout';
 import AdminLayout from './layouts/AdminLayout';
+import AuthLayout from './layouts/AuthLayout';
 
 // Pages
 import Home from './pages/Home';
@@ -31,7 +34,9 @@ import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
 import CheckoutPage from './pages/CheckoutPage';
-import OrderSuccessPage from './pages/OrderSuccessPage'; // ✅ Import the new page
+import OrderSuccessPage from './pages/OrderSuccessPage'; 
+import PaymentSuccess from './pages/PaymentSuccess';
+import MockPayment from './pages/MockPayment';
 
 // Route Protection
 import ProtectedRoute from './pages/ProtectedRoute';
@@ -42,75 +47,82 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <OrderProvider>
-            <React.Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                {/* Root Layout for all routes */}
-                <Route element={<RootLayout />}>
-                  {/* Public Routes */}
-                  <Route index element={<Home />} />
-                  <Route path="about" element={<About />} />
-                  <Route path="mission" element={<Mission />} />
-                  <Route path="services" element={<Services />} />
-                  <Route path="contact" element={<Contact />} />
-                  <Route path="faq" element={<FAQPage />} />
-                  <Route path="products" element={<Products />} />
-                  <Route path="products/:id" element={<ProductDetail />} />
-                  <Route path="cart" element={<Cart />} />
-                  <Route path="login" element={<Login />} />
-                  <Route path="signup" element={<Signup />} />
-                  <Route path="forgot-password" element={<ForgotPassword />} />
-                  <Route path="reset-password/:token" element={<ResetPassword />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/order-success" element={<OrderSuccessPage />} /> {/* ✅ Add Order Success route */}
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <AuthProvider>
+          <CartProvider>
+            <OrderProvider>
+              <React.Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                  {/* Public Routes with Root Layout (includes navbar/footer) */}
+                  <Route element={<RootLayout />}>
+                    <Route index element={<Home />} />
+                    <Route path="about" element={<About />} />
+                    <Route path="mission" element={<Mission />} />
+                    <Route path="services" element={<Services />} />
+                    <Route path="contact" element={<Contact />} />
+                    <Route path="faq" element={<FAQPage />} />
+                    <Route path="products" element={<Products />} />
+                    <Route path="products/:id" element={<ProductDetail />} />
+                    <Route path="cart" element={<Cart />} />
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-success" element={<OrderSuccessPage />} />
+                    <Route path="/payment-success/:reference?" element={<PaymentSuccess />} />
+                    <Route path="/mock-payment" element={<MockPayment />} />
 
-                  {/* Protected User Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="orders" element={<Orders />} />
+                    {/* Protected User Routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="orders" element={<Orders />} />
+                    </Route>
                   </Route>
-                </Route>
 
-                {/* Admin Routes with separate layout */}
-                <Route 
-                  path="admin" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout />
-                    </AdminRoute>
-                  }
-                >
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="products/create" element={<CreateProduct />} />
-                  <Route path="products/edit/:id" element={<CreateProduct />} />
-                  <Route path="products" element={<ManageProducts />} />
-                </Route>
+                  {/* Authentication Routes without navbar/footer */}
+                  <Route element={<AuthLayout />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="signup" element={<Signup />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password/:token" element={<ResetPassword />} />
+                  </Route>
 
-                {/* Error Handling */}
-                <Route path="not-found" element={<NotFound />} />
-                <Route path="*" element={<Navigate to="not-found" replace />} />
-              </Routes>
-            </React.Suspense>
+                  {/* Admin Routes with separate layout */}
+                  <Route 
+                    path="admin" 
+                    element={
+                      <AdminRoute>
+                        <AdminLayout />
+                      </AdminRoute>
+                    }
+                  >
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="products/create" element={<CreateProduct />} />
+                    <Route path="products/edit/:id" element={<CreateProduct />} />
+                    <Route path="products" element={<ManageProducts />} />
+                  </Route>
 
-            <ToastContainer 
-              position="top-right"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="colored"
-            />
-          </OrderProvider>
-        </CartProvider>
-      </AuthProvider>
-    </BrowserRouter>
+                  {/* Error Handling */}
+                  <Route path="not-found" element={<NotFound />} />
+                  <Route path="*" element={<Navigate to="not-found" replace />} />
+                </Routes>
+              </React.Suspense>
+
+              <ToastContainer 
+                position="top-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+              />
+            </OrderProvider>
+          </CartProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

@@ -11,7 +11,7 @@ const AuthFormWrapper = ({ children, title, subtitle, icon: Icon }) => {
     >
       <div className="text-center mb-8">
         <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Icon className="w-7 h-7 text-blue-600" />
+          <Icon className="w-7 h-7 text-green-600" />
         </div>
         <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
         {subtitle && <p className="text-gray-500 mt-2">{subtitle}</p>}

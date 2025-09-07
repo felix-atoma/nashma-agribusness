@@ -1,7 +1,8 @@
-// AuthContext.jsx - Fixed to work with your existing apiClient
+// context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
+import { authService } from '../utils/authService';
 import toast from '../utils/toast';
 
 const AuthContext = createContext();
@@ -25,14 +26,8 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Auth state updated:', authState);
-  }, [authState]);
-
   // Normalize user data from API responses
   const normalizeUserData = useCallback((response) => {
-    // Handle multiple possible response structures
     return response?.data?.data?.user || 
            response?.data?.user || 
            response?.user || 
@@ -42,7 +37,6 @@ export const AuthProvider = ({ children }) => {
   // Initialize authentication state
   const initializeAuth = useCallback(async () => {
     const token = localStorage.getItem('token');
-    console.log('Initializing auth with token:', Boolean(token));
     
     if (!token) {
       setAuthState(prev => ({ ...prev, initialized: true }));
@@ -53,12 +47,10 @@ export const AuthProvider = ({ children }) => {
       setAuthState(prev => ({ ...prev, loading: true }));
       apiClient.setAuthToken(token);
       
-      const response = await apiClient.getMe();
-      console.log('Auth initialization response:', response);
+      const response = await authService.getMe();
 
       if (response.success) {
         const userData = normalizeUserData(response);
-        console.log('Normalized user data:', userData);
         
         setAuthState({
           user: userData,
@@ -125,8 +117,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      console.log('Calling apiClient.signup with:', userData);
-      const response = await apiClient.signup(userData);
+      const response = await authService.signup(userData);
       
       if (response.success) {
         const user = await handleAuthSuccess(response, 'Account created successfully!');
@@ -149,13 +140,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      console.log('Calling apiClient.login with:', credentials);
-      const response = await apiClient.login(credentials);
+      const response = await authService.login(credentials);
       
       if (response.success) {
         const user = await handleAuthSuccess(response, 'Login successful!');
         
-        const redirectTo = location.state?.from?.pathname || '/cart';
+        const redirectTo = location.state?.from?.pathname || '/';
         navigate(redirectTo, { replace: true });
         return user;
       }
@@ -169,12 +159,45 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Google authentication
+  const handleGoogleLogin = async (googleData) => {
+    if (authState.loading) return;
+    
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await authService.googleLogin(googleData.access_token);
+      
+      if (response.success) {
+        const user = await handleAuthSuccess(response, 'Logged in successfully with Google!');
+        
+        const redirectTo = location.state?.from?.pathname || '/';
+        navigate(redirectTo, { replace: true });
+        return user;
+      }
+      
+      throw new Error(response.message || 'Google login failed');
+    } catch (error) {
+      console.error('Google login error:', error);
+      
+      let errorMessage = 'Google login failed';
+      if (error.message.includes('Invalid Google token')) {
+        errorMessage = 'Google authentication failed. Please try again.';
+      } else if (error.status === 401) {
+        errorMessage = 'Google authentication is not configured.';
+      }
+      
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(errorMessage);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       setAuthState(prev => ({ ...prev, loading: true }));
       
-      // Call your apiClient logout method
-      const logoutResult = await apiClient.logout();
+      const logoutResult = await authService.logout();
       
       // Clear local state regardless of server response
       setAuthState({
@@ -183,6 +206,9 @@ export const AuthProvider = ({ children }) => {
         initialized: true,
         error: null
       });
+      
+      localStorage.removeItem('token');
+      apiClient.setAuthToken(null);
       
       toast.success(logoutResult.message || 'Logged out successfully');
       navigate('/login', { replace: true });
@@ -198,7 +224,6 @@ export const AuthProvider = ({ children }) => {
         error: null
       });
       
-      // Force cleanup in case something went wrong
       localStorage.removeItem('token');
       apiClient.setAuthToken(null);
       
@@ -211,11 +236,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      // Use the request method directly since forgotPassword might not be implemented
-      const response = await apiClient.request('/auth/forgot-password', {
-        method: 'POST',
-        body: { email }
-      });
+      const response = await authService.forgotPassword(email);
       
       if (response.success) {
         setAuthState(prev => ({ ...prev, loading: false }));
@@ -235,14 +256,11 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await apiClient.request(`/auth/reset-password/${token}`, {
-        method: 'POST',
-        body: passwords
-      });
+      const response = await authService.resetPassword(token, passwords);
       
       if (response.success) {
         const userData = await handleAuthSuccess(response, 'Password reset successfully!');
-        navigate('/cart', { replace: true });
+        navigate('/', { replace: true });
         return userData;
       }
       
@@ -258,10 +276,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
-      const response = await apiClient.request('/auth/update-password', {
-        method: 'PATCH',
-        body: passwords
-      });
+      const response = await authService.updatePassword(passwords);
       
       if (response.success) {
         setAuthState(prev => ({ ...prev, loading: false }));
@@ -277,6 +292,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Update user profile
+  const updateProfile = async (userData) => {
+    try {
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await authService.updateProfile(userData);
+      
+      if (response.success) {
+        const updatedUser = normalizeUserData(response);
+        setAuthState(prev => ({
+          ...prev,
+          user: updatedUser,
+          loading: false
+        }));
+        toast.success('Profile updated successfully!');
+        return updatedUser;
+      }
+      
+      throw new Error(response.message || 'Profile update failed');
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
+      toast.error(error.message || 'Profile update failed');
+      throw error;
+    }
+  };
+
   // Memoized context value
   const contextValue = useMemo(() => ({
     user: authState.user,
@@ -285,10 +326,12 @@ export const AuthProvider = ({ children }) => {
     error: authState.error,
     signup,
     login,
+    handleGoogleLogin,
     logout,
     forgotPassword,
     resetPassword,
     updatePassword,
+    updateProfile,
     isAuthenticated: !!authState.user
   }), [authState]);
 

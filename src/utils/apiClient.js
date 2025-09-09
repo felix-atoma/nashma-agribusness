@@ -1,5 +1,5 @@
 // utils/apiClient.js
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || "http://localhost:5000/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || "https://nashma-backend-1-1.onrender.com/api";
 
 class ApiClient {
   constructor() {

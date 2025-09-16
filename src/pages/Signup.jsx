@@ -164,7 +164,7 @@ const Signup = () => {
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Must be at least 6 characters
+                Must be at least 7 characters
               </p>
             </div>
 

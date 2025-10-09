@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../utils/apiClient';
 import ProductGrid from '../components/ProductGrid';
@@ -10,7 +11,7 @@ const ProductsPage = () => {
   const [filters, setFilters] = useState({});
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // Create stable filter object for query key
+  // Stable filter object for React Query key
   const queryFilters = useMemo(() => {
     const stableFilters = {};
     const sortedKeys = Object.keys(filters).sort();
@@ -22,6 +23,7 @@ const ProductsPage = () => {
     return stableFilters;
   }, [filters]);
 
+  // ✅ Fetch products
   const {
     data: products = [],
     isLoading,
@@ -31,26 +33,18 @@ const ProductsPage = () => {
   } = useQuery({
     queryKey: ['products', queryFilters],
     queryFn: async () => {
-      try {
-        const response = await apiClient.getProducts(queryFilters);
-        return response.data?.products || response.data || [];
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        throw error;
-      }
+      const response = await apiClient.getProducts(queryFilters);
+      return response.data?.products || response.data || [];
     },
     staleTime: 5 * 60 * 1000,
-    retry: (failureCount, error) => {
-      if (error?.status >= 400 && error?.status < 500) {
-        return false;
-      }
-      return failureCount < 3;
-    },
+    retry: (failureCount, error) =>
+      error?.status >= 400 && error?.status < 500 ? false : failureCount < 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
+    placeholderData: previousData => previousData,
   });
 
+  // ✅ Fetch categories
   const { 
     data: categories = [],
     isError: categoriesError,
@@ -58,33 +52,56 @@ const ProductsPage = () => {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      try {
-        const response = await apiClient.getCategories();
-        return response.data || [];
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        return [];
-      }
+      const response = await apiClient.getCategories();
+      return response.data || [];
     },
     staleTime: 30 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
-    throwOnError: false,
   });
 
-  const handleFilter = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
+  const handleFilter = newFilters => setFilters(prev => ({ ...prev, ...newFilters }));
 
   const handleRetry = () => {
     refetchProducts();
-    if (categoriesError) {
-      refetchCategories();
-    }
+    if (categoriesError) refetchCategories();
   };
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      {/* ✅ SEO Meta Tags */}
+      <Helmet>
+        <title>Our Products — Nashma Agribusiness | Sustainable Potash & Eco-Friendly Exports</title>
+        <meta
+          name="description"
+          content="Explore Nashma Agribusiness products made from cocoa pod waste: eco-friendly potash, sustainable farming materials, and organic black soap ingredients. Empowering communities through circular innovation."
+        />
+        <meta
+          name="keywords"
+          content="Nashma Agribusiness products, potash Ghana, cocoa waste recycling, sustainable agriculture, eco-friendly exports, black soap potash, agribusiness Ghana, green farming solutions"
+        />
+        <meta name="author" content="Nashma Agribusiness" />
+
+        {/* Open Graph for social media */}
+        <meta property="og:title" content="Our Products — Nashma Agribusiness" />
+        <meta
+          property="og:description"
+          content="Discover sustainable potash and eco-products from Nashma Agribusiness — turning cocoa waste into wealth for farmers and communities."
+        />
+        <meta property="og:image" content="/20241112_160941.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_GB" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Nashma Agribusiness | Eco-Friendly Potash Products" />
+        <meta
+          name="twitter:description"
+          content="Explore our eco-friendly products — potash, organic black soap ingredients, and sustainable farming materials made from cocoa waste."
+        />
+        <meta name="twitter:image" content="/20241112_160941.jpg" />
+      </Helmet>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Our Products</h1>
@@ -98,7 +115,7 @@ const ProductsPage = () => {
         </button>
       </div>
 
-      {/* Rectangular Filter Component - Desktop */}
+      {/* Filters (Desktop) */}
       <div className="hidden md:block">
         <ProductFilter 
           categories={categories} 
@@ -107,7 +124,7 @@ const ProductsPage = () => {
         />
       </div>
       
-      {/* Product Grid - Full Width */}
+      {/* Products Grid */}
       <div>
         {isLoading && !products.length ? (
           <Loader className="min-h-[300px]" />
@@ -143,14 +160,14 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* Mobile Filters Overlay */}
+      {/* Mobile Filters */}
       {showMobileFilters && (
         <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-500 bg-opacity-75 transition-opacity md:hidden">
           <div className="relative z-50 p-4">
             <div className="bg-white rounded-lg">
               <ProductFilter 
                 categories={categories} 
-                onFilter={(newFilters) => {
+                onFilter={newFilters => {
                   handleFilter(newFilters);
                   setShowMobileFilters(false);
                 }}

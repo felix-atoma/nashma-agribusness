@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import ExperienceSection from "../components/ExperienceSection";
 import AgribusinessCounter from "../components/AgribusinessCounter";
 import WhyChooseUs from "../components/WhyChooseUs";
 import ContactPage from "../components/ContactPage";
+import Team from "../components/Team";
 import { FaArrowUp } from "react-icons/fa";
 
 const slides = [
@@ -29,9 +31,8 @@ const Home = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000); // Change slide every 5 seconds
-
-    return () => clearInterval(interval); // Clean up interval
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const scrollToTop = () => {
@@ -43,6 +44,27 @@ const Home = () => {
 
   return (
     <div className="w-full">
+      {/* 🌿 SEO Meta Tags */}
+      <Helmet>
+        <title>Nashma Agribusiness — Sustainable Cocoa Potash & Organic Farming in Ghana</title>
+        <meta
+          name="description"
+          content="Nashma Agribusiness empowers Ghanaian farmers through eco-friendly cocoa potash, black soap, and sustainable agriculture initiatives. Transforming waste into wealth for a greener future."
+        />
+        <meta
+          name="keywords"
+          content="Nashma Agribusiness, cocoa potash, black soap, organic farming, sustainable agriculture, Ghana, agribusiness, Ashanti Region, eco farming, women and youth empowerment"
+        />
+        <meta property="og:title" content="Nashma Agribusiness — Organic Cocoa Potash & Black Soap" />
+        <meta
+          property="og:description"
+          content="Explore Nashma Agribusiness: Ghana-based supplier of organic cocoa potash, black soap, and eco-friendly fertilizer solutions."
+        />
+        <meta property="og:image" content="/nashma-preview.png" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://www.nashmaagribusiness.com/" />
+      </Helmet>
+
       {/* Hero Carousel */}
       <div className="relative h-[80vh] sm:h-screen w-full">
         {slides.map((slide, index) => (
@@ -52,7 +74,12 @@ const Home = () => {
               index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
-            <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
             <div className="absolute inset-0 flex flex-col justify-center items-center text-center bg-black bg-opacity-50 text-white p-4 sm:p-6">
               <h1 className="text-2xl sm:text-4xl font-bold mb-3">{slide.title}</h1>
               <p className="text-sm sm:text-lg">{slide.description}</p>
@@ -80,6 +107,7 @@ const Home = () => {
           <ExperienceSection />
           <AgribusinessCounter />
           <WhyChooseUs />
+          <Team />
           <ContactPage />
         </div>
       </div>

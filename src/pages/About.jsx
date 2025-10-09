@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import {
   FaSeedling,
   FaShippingFast,
@@ -9,6 +10,28 @@ import {
 const About = () => {
   return (
     <div className="overflow-hidden">
+      {/* ✅ SEO Meta Tags */}
+      <Helmet>
+        <title>About Nashma Agribusiness — Empowering Sustainable Cocoa Communities in Ghana</title>
+        <meta
+          name="description"
+          content="Learn about Nashma Agribusiness, a Ghana-based social enterprise turning cocoa waste into organic potash and black soap. We empower women, youth, and persons with disabilities through sustainable agribusiness training and market access."
+        />
+        <meta
+          name="keywords"
+          content="Nashma Agribusiness, about Nashma, Ghana agribusiness, cocoa waste recycling, sustainable farming, organic potash, black soap, empowerment, Ashanti Region, social enterprise"
+        />
+        <meta name="author" content="Nashma Agribusiness" />
+        <meta property="og:title" content="About Nashma Agribusiness — Sustainable Cocoa Innovation in Ghana" />
+        <meta
+          property="og:description"
+          content="Nashma Agribusiness empowers Ghanaian communities to transform cocoa waste into organic potash and natural products, promoting sustainability and inclusion."
+        />
+        <meta property="og:image" content="/20241112_170250.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_GB" />
+      </Helmet>
+
       {/* Hero Image Section */}
       <div className="relative w-full h-[60vh] sm:h-[80vh] lg:h-[90vh]">
         <img
@@ -30,7 +53,7 @@ const About = () => {
         <div className="w-full md:w-1/2 flex justify-center">
           <img
             src="/20241128_150316.jpg"
-            alt="NASHMA process"
+            alt="Nashma process of turning cocoa waste into potash"
             className="w-full max-w-sm md:max-w-md lg:max-w-lg h-auto rounded-lg shadow-lg"
           />
         </div>
@@ -41,7 +64,6 @@ const About = () => {
             Empowering Communities Through Innovation
           </h2>
 
-          {/* Info Blocks */}
           {[
             {
               icon: <FaHandsHelping className="text-green-600 text-2xl" />,

@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { FaHome, FaPhone, FaEnvelope } from "react-icons/fa";
 import { toast } from "react-toastify";
-import apiClient from "../utils/apiClient"
+import apiClient from "../utils/apiClient";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -18,25 +19,19 @@ const ContactForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (!validateEmail(formData.email)) {
       toast.error("Invalid email format.");
       return;
     }
-
     if (!formData.name.trim()) {
       toast.error("Name is required.");
       return;
     }
-
     if (!formData.message.trim()) {
       toast.error("Message is required.");
       return;
@@ -45,26 +40,11 @@ const ContactForm = () => {
     setIsSending(true);
 
     try {
-      // Use the correct method from apiClient
       const response = await apiClient.sendContactMessage(formData);
-      
-      console.log("Contact form response:", response);
-      
       toast.success(response.data?.message || "Your message has been sent successfully!");
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-      });
-
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch (error) {
       console.error("Contact form submission error:", error);
-      
-      // Handle different error scenarios
       if (error.status === 400) {
         toast.error(error.data?.message || "Please check your input and try again.");
       } else if (error.status === 500) {
@@ -81,10 +61,45 @@ const ContactForm = () => {
 
   return (
     <div className="w-full mx-auto p-4 md:p-8">
+      {/* ✅ SEO Meta Tags */}
+      <Helmet>
+        <title>Contact Us — Nashma Agribusiness | Get in Touch for Potash & Sustainable Products</title>
+        <meta
+          name="description"
+          content="Contact Nashma Agribusiness in Kumasi, Ghana. Get in touch to inquire about organic cocoa potash, African black soap, bulk supply, and sustainable farming initiatives."
+        />
+        <meta
+          name="keywords"
+          content="contact Nashma Agribusiness, cocoa potash Ghana, black soap supplier, organic fertilizer, sustainable agriculture, Ashanti Region, Nashma contact, Kumasi agribusiness"
+        />
+        <meta name="author" content="Nashma Agribusiness" />
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph for social sharing */}
+        <meta property="og:title" content="Contact Nashma Agribusiness — Sustainable Cocoa Potash & Black Soap" />
+        <meta
+          property="og:description"
+          content="Reach out to Nashma Agribusiness in Ghana for organic potash, sustainable cocoa farming, and eco-friendly product partnerships."
+        />
+        <meta property="og:image" content="/IMG-20250307-WA0027.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_GB" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact Nashma Agribusiness | Organic Potash & Black Soap Supply" />
+        <meta
+          name="twitter:description"
+          content="Get in touch with Nashma Agribusiness — your trusted source for sustainable potash and black soap production in Ghana."
+        />
+        <meta name="twitter:image" content="/IMG-20250307-WA0027.jpg" />
+      </Helmet>
+
+      {/* Banner */}
       <div className="relative w-full mb-6">
         <img
           src="/IMG-20250307-WA0027.jpg"
-          alt="Contact"
+          alt="Contact Nashma Agribusiness Office in Kumasi"
           className="w-full h-auto md:h-[400px] object-cover"
         />
       </div>
@@ -94,15 +109,13 @@ const ContactForm = () => {
       </h2>
 
       <div className="flex flex-col md:flex-row gap-6 md:gap-12">
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 flex flex-col gap-4 w-full"
-        >
+        {/* Contact Form */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 w-full">
           {[
             { field: "name", type: "text", placeholder: "Enter your name" },
             { field: "email", type: "email", placeholder: "Enter your email" },
             { field: "phone", type: "text", placeholder: "Enter your phone (optional)" },
-            { field: "subject", type: "text", placeholder: "Enter your subject" }
+            { field: "subject", type: "text", placeholder: "Enter your subject" },
           ].map(({ field, type, placeholder }) => (
             <input
               key={field}
@@ -112,7 +125,7 @@ const ContactForm = () => {
               value={formData[field]}
               onChange={handleChange}
               className="p-3 border border-green-600 text-base w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required={field !== "phone"} // Phone is optional
+              required={field !== "phone"}
             />
           ))}
 
@@ -161,6 +174,7 @@ const ContactForm = () => {
           </button>
         </form>
 
+        {/* Contact Info */}
         <div className="flex-1 flex flex-col gap-6 text-center md:text-left">
           <div className="flex flex-col md:flex-row items-center gap-3">
             <FaHome size={24} className="text-green-600" />

@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from "react-icons/fa";
 
@@ -32,19 +33,44 @@ const Services = () => {
       image: "/20241112_163334.jpg",
       title: "Sustainable Farming Workshops",
       description:
-        "Teaching modern and sustainable farming techniques to enhance productivity while protecting the environment. We aim to integrate these practices with potash ",
+        "Teaching modern and sustainable farming techniques to enhance productivity while protecting the environment. We aim to integrate these practices with potash innovation.",
     },
   ];
 
   const handleButtonClick = (id) => {
-    navigate(`/contact`); // Navigate to the dynamic route for the service
+    navigate(`/contact`);
   };
 
   return (
     <div className="p-10 bg-gray-50">
+      {/* ✅ SEO Tags */}
+      <Helmet>
+        <title>Our Services — Nashma Agribusiness | Sustainable Potash, Bulk Supply & Training</title>
+        <meta
+          name="description"
+          content="Explore Nashma Agribusiness services: organic potash production, global bulk supply, skills training in African black soap, and sustainable farming workshops. Empowering communities across Ghana."
+        />
+        <meta
+          name="keywords"
+          content="Nashma Agribusiness services, potash production Ghana, organic potash, black soap training, global bulk supply, sustainable farming, cocoa waste recycling, agribusiness empowerment"
+        />
+        <meta name="author" content="Nashma Agribusiness" />
+        <meta property="og:title" content="Our Services — Nashma Agribusiness | Sustainable Potash & Global Supply" />
+        <meta
+          property="og:description"
+          content="Discover how Nashma Agribusiness transforms cocoa waste into wealth through potash production, black soap training, and sustainable farming workshops."
+        />
+        <meta property="og:image" content="/20241112_160941.jpg" />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="en_GB" />
+      </Helmet>
+
+      {/* Page Header */}
       <h1 className="text-4xl font-bold text-green-700 text-center mb-10 mt-16">
         Our Expertise: Empowering Sustainable Solutions and Global Outreach
       </h1>
+
+      {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {services.map((service) => (
           <div

@@ -1,31 +1,43 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
-import { MdEmail, MdWork } from "react-icons/md";
+import { MdEmail, MdWork, MdLocationOn } from "react-icons/md";
 
 const Team = () => {
   const teamMembers = [
     {
       name: "Malik Sumaila Bipembi",
       role: "Manager",
-      email: "malik@nashmafarms@gmail.com",
-      image: "dist/Malik1.jpg", // located in public folder
+      email: "malik@nashmafarms.com",
+      image: "dist/Malik1.jpg",
     },
     {
       name: "Nadiatu Ali Dawud",
       role: "Relationship and Marketing Manager",
-      email: "nadia@nashmafarms@gmail.com",
+      email: "nadia@nashmafarms.com",
       image: "dist/Nadia.jpg",
     },
     {
       name: "Shita Hamidu",
       role: "Field and Training Manager",
-      email: "shita@nashmafarms@gmail.com",
+      email: "shita@nashmafarms.com",
       image: "dist/Shita.jpg",
     },
   ];
 
+  // Agricultural color palette
+  const colors = {
+    primary: {
+      darkGreen: "#1B5E20",     // Deep forest green
+      mediumGreen: "#2E7D32",   // Healthy leaf green
+      lightGreen: "#4CAF50",    // Fresh growth green
+      earthBrown: "#5D4037",    // Rich soil brown
+      golden: "#FFB300",        // Harvest gold
+      cream: "#FFF8E1",         // Light cream background
+    }
+  };
+
   return (
-    <div className="w-full bg-gradient-to-br from-green-50 to-white py-16 px-4">
+    <div className="w-full bg-gradient-to-br from-green-50 to-amber-50 py-16 px-4">
       <Helmet>
         <title>Our Team — Nashma Agribusiness Leadership | Meet Our Expert Team</title>
         <meta
@@ -45,76 +57,140 @@ const Team = () => {
       </Helmet>
 
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-4">
-            Meet Our Team
+        {/* Header Section */}
+        <div className="text-center mb-16">
+          <div className="inline-block mb-4">
+            <span className="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold uppercase tracking-wide">
+              Our Experts
+            </span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-green-900 mb-4">
+            Meet Our <span className="text-amber-600">Team</span>
           </h1>
-          <p className="text-lg text-green-700 max-w-2xl mx-auto">
+          <div className="w-24 h-1 bg-amber-500 mx-auto mb-6"></div>
+          <p className="text-lg text-green-800 max-w-2xl mx-auto leading-relaxed">
             Dedicated professionals committed to excellence in agribusiness and sustainable farming practices.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Team Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {teamMembers.map((member, index) => (
             <div
               key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden group"
+              className="group relative bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 overflow-hidden border border-green-100"
             >
-              <div className="relative h-64 overflow-hidden bg-gray-200">
+              {/* Background accent */}
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-600 to-amber-500"></div>
+              
+              {/* Image Container */}
+              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-green-50 to-amber-50">
                 <img
                   src={member.image}
                   alt={`${member.name} - ${member.role}`}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   onError={(e) => {
                     e.target.src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23059669' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='120' fill='white'%3E" +
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%232E7D32' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='120' fill='white'%3E" +
                       member.name.charAt(0) +
                       "%3C/text%3E%3C/svg%3E";
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
 
+              {/* Content */}
               <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-xl font-bold text-green-900 mb-3 group-hover:text-green-700 transition-colors">
                   {member.name}
                 </h3>
 
-                <div className="flex items-start gap-2 text-green-600 mb-4">
-                  <MdWork className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                  <p className="font-semibold text-sm leading-relaxed">
-                    {member.role}
-                  </p>
+                {/* Role with icon */}
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <MdWork className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-green-800 text-sm">
+                      {member.role}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
-                  <MdEmail className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                {/* Email with icon */}
+                <div className="flex items-center gap-3 pt-4 border-t border-green-100">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <MdEmail className="w-4 h-4 text-green-600" />
+                  </div>
                   <a
                     href={`mailto:${member.email}`}
-                    className="text-sm text-gray-600 hover:text-green-600 transition-colors break-all"
+                    className="text-sm text-green-700 hover:text-amber-600 transition-colors break-all font-medium"
                   >
                     {member.email}
                   </a>
                 </div>
               </div>
+
+              {/* Hover effect border */}
+              <div className="absolute inset-0 border-2 border-transparent group-hover:border-green-300 rounded-xl transition-all duration-300 pointer-events-none"></div>
             </div>
           ))}
         </div>
 
+        {/* CTA Section */}
         <div className="mt-16">
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-green-800 mb-4">
-              Join Our Team
-            </h2>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              At Nashma Agribusiness Ltd., we're always looking for passionate individuals who share our commitment to sustainable agriculture and innovation. If you're interested in joining our team, we'd love to hear from you.
-            </p>
-            <a
-              href="/contact"
-              className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 shadow-md hover:shadow-lg"
-            >
-              Get In Touch
-            </a>
+          <div className="relative bg-gradient-to-r from-green-600 to-green-700 rounded-2xl shadow-2xl p-8 text-center max-w-4xl mx-auto overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `radial-gradient(circle, #ffffff 1px, transparent 1px)`,
+                backgroundSize: '20px 20px'
+              }}></div>
+            </div>
+            
+            <div className="relative z-10">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                Grow With Us
+              </h2>
+              <p className="text-green-100 mb-6 leading-relaxed max-w-2xl mx-auto">
+                At Nashma Agribusiness Ltd., we're always looking for passionate individuals who share our commitment to sustainable agriculture and innovation. If you're interested in joining our team, we'd love to hear from you.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="/contact"
+                  className="inline-flex items-center justify-center bg-amber-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                  Join Our Team
+                </a>
+                <a
+                  href="/careers"
+                  className="inline-flex items-center justify-center bg-white text-green-700 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-all duration-300 border border-green-200"
+                >
+                  View Openings
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
+          <div className="text-center p-4">
+            <div className="text-2xl font-bold text-green-700">3+</div>
+            <div className="text-sm text-green-600">Expert Managers</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-2xl font-bold text-amber-600">50+</div>
+            <div className="text-sm text-amber-600">Years Combined</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-2xl font-bold text-green-700">100%</div>
+            <div className="text-sm text-green-600">Dedicated</div>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-2xl font-bold text-amber-600">24/7</div>
+            <div className="text-sm text-amber-600">Support</div>
           </div>
         </div>
       </div>

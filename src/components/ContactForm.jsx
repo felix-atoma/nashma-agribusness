@@ -1,6 +1,6 @@
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { FaHome, FaPhone, FaEnvelope } from "react-icons/fa";
+import { FaHome, FaPhone, FaEnvelope, FaSeedling, FaLeaf, FaArrowRight, FaMapMarkerAlt, FaClock } from "react-icons/fa";
 import { toast } from "react-toastify";
 import apiClient from "../utils/apiClient";
 
@@ -14,6 +14,30 @@ const ContactForm = () => {
   });
 
   const [isSending, setIsSending] = useState(false);
+  const [animated, setAnimated] = useState(false);
+  const formRef = useRef(null);
+
+  // Intersection Observer for animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setAnimated(true);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (formRef.current) {
+      observer.observe(formRef.current);
+    }
+
+    return () => {
+      if (formRef.current) {
+        observer.unobserve(formRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,7 +49,7 @@ const ContactForm = () => {
     e.preventDefault();
 
     if (!validateEmail(formData.email)) {
-      toast.error("Invalid email format.");
+      toast.error("Please enter a valid email address.");
       return;
     }
     if (!formData.name.trim()) {
@@ -59,8 +83,35 @@ const ContactForm = () => {
     }
   };
 
+  const contactInfo = [
+    {
+      icon: <FaMapMarkerAlt className="w-6 h-6" />,
+      title: "Our Location",
+      details: ["Apemso-KNUST, Kumasi", "Ashanti Region, Ghana"],
+      color: "from-green-500 to-emerald-500"
+    },
+    {
+      icon: <FaPhone className="w-6 h-6" />,
+      title: "Phone Numbers",
+      details: ["0545086577", "0243241649"],
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      icon: <FaEnvelope className="w-6 h-6" />,
+      title: "Email Address",
+      details: ["nashmafarms@gmail.com", "Reach out anytime!"],
+      color: "from-amber-500 to-orange-500"
+    },
+    {
+      icon: <FaClock className="w-6 h-6" />,
+      title: "Business Hours",
+      details: ["Monday - Friday: 8:00 AM - 6:00 PM", "Saturday: 9:00 AM - 2:00 PM"],
+      color: "from-purple-500 to-indigo-500"
+    }
+  ];
+
   return (
-    <div className="w-full mx-auto p-4 md:p-8">
+    <div className="w-full mx-auto p-4 md:p-8 bg-gradient-to-br from-green-50 to-amber-50">
       {/* ✅ SEO Meta Tags */}
       <Helmet>
         <title>Contact Us — Nashma Agribusiness | Get in Touch for Potash & Sustainable Products</title>
@@ -95,108 +146,202 @@ const ContactForm = () => {
         <meta name="twitter:image" content="/IMG-20250307-WA0027.jpg" />
       </Helmet>
 
-      {/* Banner */}
-      <div className="relative w-full mb-6">
-        <img
-          src="/IMG-20250307-WA0027.jpg"
-          alt="Contact Nashma Agribusiness Office in Kumasi"
-          className="w-full h-auto md:h-[400px] object-cover"
-        />
-      </div>
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-72 h-72 bg-green-200 rounded-full -translate-x-36 -translate-y-36 opacity-20"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-200 rounded-full translate-x-48 translate-y-48 opacity-30"></div>
 
-      <h2 className="text-2xl md:text-3xl mb-6 text-gray-800 text-center md:text-left">
-        Get in Touch
-      </h2>
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+            <FaSeedling className="w-4 h-4" />
+            Get In Touch
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-green-900 mb-4">
+            Let's Grow <span className="text-amber-600">Together</span>
+          </h1>
+          <div className="w-24 h-1 bg-amber-500 mx-auto mb-6"></div>
+          <p className="text-lg md:text-xl text-green-700 max-w-2xl mx-auto leading-relaxed">
+            Ready to transform your agricultural practices? Reach out to us for premium cocoa potash, 
+            sustainable farming solutions, and partnership opportunities.
+          </p>
+        </div>
 
-      <div className="flex flex-col md:flex-row gap-6 md:gap-12">
-        {/* Contact Form */}
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 w-full">
-          {[
-            { field: "name", type: "text", placeholder: "Enter your name" },
-            { field: "email", type: "email", placeholder: "Enter your email" },
-            { field: "phone", type: "text", placeholder: "Enter your phone (optional)" },
-            { field: "subject", type: "text", placeholder: "Enter your subject" },
-          ].map(({ field, type, placeholder }) => (
-            <input
-              key={field}
-              type={type}
-              name={field}
-              placeholder={placeholder}
-              value={formData[field]}
-              onChange={handleChange}
-              className="p-3 border border-green-600 text-base w-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              required={field !== "phone"}
-            />
-          ))}
-
-          <textarea
-            name="message"
-            placeholder="Enter your message"
-            value={formData.message}
-            onChange={handleChange}
-            className="p-3 border border-green-600 text-base w-full resize-none focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            rows="5"
-            required
+        {/* Banner */}
+        <div className="relative w-full mb-12 rounded-2xl overflow-hidden shadow-2xl">
+          <img
+            src="/IMG-20250307-WA0027.jpg"
+            alt="Nashma Agribusiness Office in Kumasi"
+            className="w-full h-auto md:h-[400px] object-cover transform hover:scale-105 transition-transform duration-700"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-900/40 to-amber-900/20"></div>
+          <div className="absolute bottom-6 left-6 text-white">
+            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+              <FaLeaf className="w-4 h-4" />
+              <span className="font-semibold">Nashma Agribusiness Headquarters</span>
+            </div>
+          </div>
+        </div>
 
-          <button
-            type="submit"
-            className={`p-3 border-2 border-green-600 bg-white text-green-600 font-bold text-lg w-full md:w-[200px] mt-4 transition-all duration-200 ${
-              isSending
-                ? "cursor-not-allowed opacity-50"
-                : "hover:bg-green-600 hover:text-white"
-            }`}
-            disabled={isSending}
-          >
-            {isSending ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                Sending...
-              </span>
-            ) : (
-              "Send Message"
-            )}
-          </button>
-        </form>
+        <div 
+          ref={formRef}
+          className="flex flex-col lg:flex-row gap-8 lg:gap-12"
+        >
+          {/* Contact Form */}
+          <div className={`flex-1 transition-all duration-1000 ${
+            animated ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+          }`}>
+            <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-green-100">
+              <h2 className="text-2xl md:text-3xl font-bold text-green-900 mb-6 flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <FaEnvelope className="w-6 h-6 text-green-600" />
+                </div>
+                Send Us a Message
+              </h2>
 
-        {/* Contact Info */}
-        <div className="flex-1 flex flex-col gap-6 text-center md:text-left">
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <FaHome size={24} className="text-green-600" />
-            <div>
-              <p className="font-bold m-0">Kumasi, Ghana</p>
-              <p className="m-0">Apemso-KNUST, Kumasi</p>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {[
+                  { field: "name", type: "text", placeholder: "Enter your full name" },
+                  { field: "email", type: "email", placeholder: "Enter your email address" },
+                  { field: "phone", type: "text", placeholder: "Enter your phone number (optional)" },
+                  { field: "subject", type: "text", placeholder: "Enter message subject" },
+                ].map(({ field, type, placeholder }, index) => (
+                  <div 
+                    key={field}
+                    className={`transition-all duration-700 ${
+                      animated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}
+                    style={{ transitionDelay: `${index * 100}ms` }}
+                  >
+                    <input
+                      type={type}
+                      name={field}
+                      placeholder={placeholder}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      className="w-full p-4 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 bg-green-50/50 hover:bg-green-50 text-green-900 placeholder-green-400"
+                      required={field !== "phone"}
+                    />
+                  </div>
+                ))}
+
+                <div className={`transition-all duration-700 ${
+                  animated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`} style={{ transitionDelay: '400ms' }}>
+                  <textarea
+                    name="message"
+                    placeholder="Tell us about your project or inquiry..."
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full p-4 border border-green-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 bg-green-50/50 hover:bg-green-50 text-green-900 placeholder-green-400 resize-none"
+                    rows="6"
+                    required
+                  />
+                </div>
+
+                <div className={`transition-all duration-700 ${
+                  animated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`} style={{ transitionDelay: '500ms' }}>
+                  <button
+                    type="submit"
+                    disabled={isSending}
+                    className="group w-full md:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isSending ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Sending Message...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send Message</span>
+                        <FaArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <FaPhone size={24} className="text-green-600" />
-            <div>
-              <p className="m-0">0545086577 / 0243241649</p>
-              <p className="m-0">Mon to Fri 9am to 5pm</p>
+          {/* Contact Information */}
+          <div className={`flex-1 transition-all duration-1000 ${
+            animated ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'
+          }`}>
+            <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-green-100 h-full">
+              <h2 className="text-2xl md:text-3xl font-bold text-green-900 mb-6 flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <FaPhone className="w-6 h-6 text-green-600" />
+                </div>
+                Contact Information
+              </h2>
+
+              <div className="space-y-6">
+                {contactInfo.map((info, index) => (
+                  <div 
+                    key={index}
+                    className={`flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-amber-50 border border-green-100 hover:border-green-200 transition-all duration-300 group hover:shadow-lg ${
+                      animated ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+                    }`}
+                    style={{ transitionDelay: `${index * 150 + 600}ms` }}
+                  >
+                    <div className={`p-3 rounded-xl bg-gradient-to-r ${info.color} text-white group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                      {info.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-green-900 text-lg mb-2">
+                        {info.title}
+                      </h3>
+                      {info.details.map((detail, detailIndex) => (
+                        <p key={detailIndex} className="text-green-700 leading-relaxed">
+                          {detail}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Response Guarantee */}
+              <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg">
+                    <FaLeaf className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-amber-800">Quick Response Guaranteed</p>
+                    <p className="text-amber-700 text-sm">We typically respond within 2 hours during business days</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-3">
-            <FaEnvelope size={24} className="text-green-600" />
-            <div>
-              <p className="m-0">nashmafarms@gmail.com</p>
-              <p className="m-0">Reach out anytime!</p>
+        {/* Map & Location Section */}
+        <div className="mt-16 bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-green-100">
+          <h2 className="text-2xl md:text-3xl font-bold text-green-900 mb-6 text-center">
+            Visit Our Location
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-green-800">Nashma Agribusiness Ltd.</h3>
+              <p className="text-green-700 leading-relaxed">
+                Located in the heart of Ghana's agricultural region in Kumasi, 
+                we're easily accessible for meetings, product pickups, and consultations 
+                about sustainable farming practices.
+              </p>
+              <div className="flex items-center gap-2 text-green-600">
+                <FaMapMarkerAlt className="w-4 h-4" />
+                <span className="font-medium">Apemso-KNUST, Kumasi, Ashanti Region, Ghana</span>
+              </div>
+            </div>
+            <div className="bg-green-100 rounded-xl h-64 flex items-center justify-center">
+              <div className="text-center text-green-700">
+                <FaMapMarkerAlt className="w-12 h-12 mx-auto mb-4 text-green-600" />
+                <p className="font-semibold">Interactive Map</p>
+                <p className="text-sm">Map integration would go here</p>
+              </div>
             </div>
           </div>
         </div>

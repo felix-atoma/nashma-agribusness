@@ -4,13 +4,13 @@ import ContactForm from "../components/ContactForm";
 
 const Contact = () => {
   return (
-    <div className="p-6 md:p-4 contact-container">
+    <div className="contact-container">
       {/* ✅ SEO Meta Tags */}
       <Helmet>
         <title>Contact Nashma Agribusiness — Get in Touch with Us</title>
         <meta
           name="description"
-          content="Reach out to Nashma Agribusiness for inquiries about organic cocoa potash, black soap, and natural fertilizers. Based in Kumasi, Ghana, we’re happy to assist with wholesale and partnership requests."
+          content="Reach out to Nashma Agribusiness for inquiries about organic cocoa potash, black soap, and natural fertilizers. Based in Kumasi, Ghana, we're happy to assist with wholesale and partnership requests."
         />
         <meta
           name="keywords"
@@ -29,7 +29,6 @@ const Contact = () => {
       </Helmet>
 
       {/* Page Content */}
-      <h2 className="text-2xl font-bold mb-4 md:text-lg">Contact Us</h2>
       <ContactForm />
     </div>
   );

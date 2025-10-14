@@ -8,19 +8,19 @@ const Team = () => {
       name: "Malik Sumaila Bipembi",
       role: "Manager",
       email: "malik@nashmafarms@gmail.com",
-      image: "/malik.jpg", // Add your team member images to public folder
+      image: "dist/Malik1.jpg", // located in public folder
     },
     {
       name: "Nadiatu Ali Dawud",
       role: "Relationship and Marketing Manager",
-      email: "Nadia@nashmafarms@gmail.com",
-      image: "/nadiatu.jpg",
+      email: "nadia@nashmafarms@gmail.com",
+      image: "dist/Nadia.jpg",
     },
     {
       name: "Shita Hamidu",
       role: "Field and Training Manager",
       email: "shita@nashmafarms@gmail.com",
-      image: "/shita.jpg",
+      image: "dist/Shita.jpg",
     },
   ];
 
@@ -50,7 +50,7 @@ const Team = () => {
             Meet Our Team
           </h1>
           <p className="text-lg text-green-700 max-w-2xl mx-auto">
-            Dedicated professionals committed to excellence in agribusiness and sustainable farming practices
+            Dedicated professionals committed to excellence in agribusiness and sustainable farming practices.
           </p>
         </div>
 
@@ -66,7 +66,10 @@ const Team = () => {
                   alt={`${member.name} - ${member.role}`}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   onError={(e) => {
-                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23059669' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='120' fill='white'%3E${member.name.charAt(0)}%3C/text%3E%3C/svg%3E";
+                    e.target.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect fill='%23059669' width='400' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='120' fill='white'%3E" +
+                      member.name.charAt(0) +
+                      "%3C/text%3E%3C/svg%3E";
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -76,7 +79,7 @@ const Team = () => {
                 <h3 className="text-xl font-bold text-gray-800 mb-2">
                   {member.name}
                 </h3>
-                
+
                 <div className="flex items-start gap-2 text-green-600 mb-4">
                   <MdWork className="w-5 h-5 mt-0.5 flex-shrink-0" />
                   <p className="font-semibold text-sm leading-relaxed">

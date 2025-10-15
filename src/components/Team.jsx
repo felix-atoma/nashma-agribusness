@@ -8,19 +8,19 @@ const Team = () => {
       name: "Malik Sumaila Bipembi",
       role: "Manager",
       email: "malik@nashmafarms.com",
-      image: "dist/Malik1.jpg",
+      image: "/malik.jpg",
     },
     {
       name: "Nadiatu Ali Dawud",
       role: "Relationship and Marketing Manager",
       email: "nadia@nashmafarms.com",
-      image: "dist/Nadia.jpg",
+      image: "/nadia.jpg",
     },
     {
       name: "Shita Hamidu",
       role: "Field and Training Manager",
       email: "shita@nashmafarms.com",
-      image: "dist/Shita.jpg",
+      image: "/shitu.jpg",
     },
   ];
 

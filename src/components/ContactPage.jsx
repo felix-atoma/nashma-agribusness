@@ -16,7 +16,7 @@ const ContactPage = () => {
     {
       icon: <FiMail className="w-6 h-6" />,
       label: "Email",
-      value: "nashmafarms@gmail.com",
+      value: "nashmaagribusiness.com",
       subValue: "We respond within 24 hours",
       color: "from-amber-500 to-orange-500",
       bgColor: "bg-amber-50",

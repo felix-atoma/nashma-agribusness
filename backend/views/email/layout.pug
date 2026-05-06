@@ -1,19 +1,42 @@
 doctype html
-html
+html(lang='en')
   head
     meta(charset='UTF-8')
-    title= subject
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title= subject || 'Nashma Agribusiness'
     style.
-      body { font-family: Arial, sans-serif; line-height: 1.6; }
-      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-      .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
-      .content { padding: 20px; }
-      .footer { margin-top: 20px; padding: 20px; text-align: center; color: #6c757d; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { background: #f4f7f0; font-family: Arial, Helvetica, sans-serif; }
+      .wrapper { background: #f4f7f0; padding: 40px 16px; }
+      .card { background: #fff; border-radius: 12px; max-width: 600px; margin: 0 auto; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+      .header { background: linear-gradient(135deg, #166534, #15803d); padding: 32px 40px; text-align: center; }
+      .header h1 { color: #fff; font-size: 22px; font-weight: 700; margin: 0; }
+      .header p { color: #bbf7d0; font-size: 13px; margin: 6px 0 0; }
+      .body { padding: 36px 40px; color: #374151; line-height: 1.7; font-size: 15px; }
+      .body h2 { color: #166534; font-size: 19px; margin-bottom: 16px; }
+      .body p { margin-bottom: 14px; }
+      .body ul { padding-left: 20px; margin-bottom: 16px; }
+      .body ul li { margin-bottom: 6px; }
+      .btn { display: inline-block; background: #d97706; color: #fff !important; padding: 13px 30px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; margin: 20px 0; }
+      .divider { border: none; border-top: 1px solid #dcfce7; margin: 20px 0; }
+      .info-row { background: #f0fdf4; border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; }
+      .info-row strong { color: #166534; }
+      .footer { background: #f0fdf4; padding: 20px 40px; text-align: center; border-top: 1px solid #dcfce7; }
+      .footer p { color: #6b7280; font-size: 12px; line-height: 1.7; }
+      .footer a { color: #166534; text-decoration: none; }
+
   body
-    .container
-      .header
-        h1 Nashma Agribusiness
-      .content
-        block content
-      .footer
-        p © #{new Date().getFullYear()} Nashma Agribusiness. All rights reserved.
+    .wrapper
+      .card
+        .header
+          h1 Nashma Agribusiness Ltd.
+          p Growing Sustainable Futures
+        .body
+          block content
+        .footer
+          p
+            | &copy; #{new Date().getFullYear()} Nashma Agribusiness Ltd. &bull; Apemso-KNUST, Kumasi, Ghana
+            br
+            a(href='https://www.nashmaagribusiness.com') www.nashmaagribusiness.com
+            |  &bull;
+            a(href='mailto:info@nashmaagribusiness.com') info@nashmaagribusiness.com

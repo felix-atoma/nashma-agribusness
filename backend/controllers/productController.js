@@ -58,9 +58,21 @@ const createProduct = async (req, res) => {
   }
 };
 
-// IMPORTANT: Make sure to export all functions
+// GET /api/products/categories — static Nashma product categories
+const getCategories = async (req, res) => {
+  const categories = [
+    { id: 'potash', label: 'Cocoa Potash', description: 'Organic potash from cocoa pods' },
+    { id: 'black-soap', label: 'African Black Soap', description: 'Natural chemical-free soap' },
+    { id: 'farm-inputs', label: 'Farm Inputs', description: 'Fertilisers and agro-inputs' },
+    { id: 'training', label: 'Training Kits', description: 'Starter kits for potash making' },
+    { id: 'commodities', label: 'Agro-Commodities', description: 'Bulk agricultural products' },
+  ];
+  res.json({ status: 'success', data: categories });
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
-  createProduct
+  createProduct,
+  getCategories,
 };

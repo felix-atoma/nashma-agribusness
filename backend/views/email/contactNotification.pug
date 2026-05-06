@@ -2,18 +2,28 @@ extends layout
 
 block content
   h2 New Contact Form Submission
-  h3 #{contact.subject}
-  p 
-    strong From: 
-    | #{contact.name} (#{contact.email})
-  if contact.phone
-    p 
-      strong Phone: 
-      | #{contact.phone}
-  p 
-    strong Message: 
-    | #{contact.message}
-  p 
-    strong Received: 
-    | #{new Date(contact.createdAt).toLocaleString()}
-  a(href=`${url}`) View in admin dashboard
+  .info-row
+    p
+      strong Subject:&nbsp;
+      | #{contact.subject}
+  .info-row
+    p
+      strong From:&nbsp;
+      | #{contact.name}
+    p
+      strong Email:&nbsp;
+      a(href='mailto:#{contact.email}') #{contact.email}
+    if contact.phone
+      p
+        strong Phone:&nbsp;
+        a(href='tel:#{contact.phone}') #{contact.phone}
+  .info-row
+    p
+      strong Message:
+    p(style='white-space:pre-wrap;') #{contact.message}
+  .info-row
+    p
+      strong Received:&nbsp;
+      | #{new Date(contact.createdAt).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+  p(style='text-align:center;')
+    a.btn(href=url) View in Admin Dashboard

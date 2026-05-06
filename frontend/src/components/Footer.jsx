@@ -18,33 +18,26 @@ const Footer = () => {
       return;
     }
 
-    const apiBase = import.meta.env?.VITE_API_BASE_URL;
-    if (!apiBase) {
-      toast.error("API base URL is not set.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await fetch(`${apiBase}/api/newsletter`, {
+      const apiBase = import.meta.env?.VITE_API_BASE_URL?.trim() || "https://nashma-backend-1-1.onrender.com/api";
+      const res = await fetch(`${apiBase}/newsletter`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+
+      const data = await res.json();
 
       if (res.ok) {
         toast.success("Thank you for subscribing to our agricultural updates!");
         analytics.newsletterSubscribe();
         setEmail("");
       } else {
-        const data = await res.json();
         throw new Error(data.message || "Subscription failed.");
       }
     } catch (err) {
       console.error("Subscription error:", err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

@@ -217,13 +217,14 @@ const routeConfigs = [
   { path: '/api/products', file: './routes/productRoutes' },
   { path: '/api/cart', file: './routes/cartRoutes' },
   { path: '/api/contact', file: './routes/contactRoutes' },
+  { path: '/api/newsletter', file: './routes/newsletterRoutes' },
   { path: '/api/orders', file: './routes/orderRoutes' },
   { path: '/api/payment', file: './routes/payment' },
-  { 
-    path: '/api/admin', 
+  {
+    path: '/api/admin',
     file: './routes/adminRoutes',
-    middleware: [protect, restrictTo('admin')]
-  }
+    middleware: [protect, restrictTo('admin')],
+  },
 ];
 
 // Load routes with detailed logging

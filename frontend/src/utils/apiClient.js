@@ -309,10 +309,30 @@ async updatePassword(passwords) {
   }
 
   async verifyPayment(reference) {
-    const response = await this.request(`/payment/verify/${reference}`, {
-      method: "GET"
+    return this.request(`/payment/verify/${reference}`, { method: "GET" });
+  }
+
+  async sendContactMessage(data) {
+    return this.request("/contact", { method: "POST", body: data });
+  }
+
+  async getCategories() {
+    return this.request("/products/categories");
+  }
+
+  async getOrderById(orderId) {
+    return this.request(`/orders/${orderId}`);
+  }
+
+  async updateOrderStatus(orderId, status) {
+    return this.request(`/orders/${orderId}/status`, {
+      method: "PATCH",
+      body: { status },
     });
-    return response;
+  }
+
+  async subscribeNewsletter(email) {
+    return this.request("/newsletter", { method: "POST", body: { email } });
   }
 }
 

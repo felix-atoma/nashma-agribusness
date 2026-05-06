@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from '../utils/toast';
+import apiClient from '../utils/apiClient';
 
 const CheckoutPage = () => {
   const { placeOrder, loading, error } = useOrder();
@@ -79,29 +80,15 @@ const CheckoutPage = () => {
   const verifyPayment = async (reference) => {
     try {
       setIsProcessingPayment(true);
-      
-      // Verify payment with your backend - use the correct API URL
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${API_URL}/payment/verify/${reference}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const result = await response.json();
-      
+      const result = await apiClient.verifyPayment(reference);
       if (result.success) {
-        // Clear cart and redirect to success page
         clearCart();
         toast.success('Payment successful! Order confirmed.');
-        
-        // Redirect to success page
-        navigate('/order-success', { 
-          state: { 
-            order: result.data.order,
-            paymentMethod: paymentMethod
-          } 
+        navigate('/order-success', {
+          state: {
+            order: result.data?.data?.order || result.data?.order,
+            paymentMethod: paymentMethod,
+          },
         });
       } else {
         toast.error('Payment verification failed. Please contact support.');

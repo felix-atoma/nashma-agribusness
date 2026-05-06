@@ -1,0 +1,35 @@
+User-agent: *
+Allow: /
+
+# Block admin and auth routes
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /order-success
+Disallow: /payment-success/
+Disallow: /mock-payment
+Disallow: /profile
+Disallow: /orders
+
+# Block API and utility paths
+Disallow: /api/
+Disallow: /*.json$
+
+# Sitemap location
+Sitemap: https://www.nashmaagribusiness.com/sitemap.xml
+
+# Crawl delay for polite crawling
+Crawl-delay: 2
+
+# Specific bot directives
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2

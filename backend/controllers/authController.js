@@ -14,6 +14,8 @@ const Email = require('../utils/email');
 const signToken = (id, expiresIn = process.env.JWT_EXPIRES_IN) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn });
 
+exports.signToken = signToken;
+
 const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 

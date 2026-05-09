@@ -3,7 +3,7 @@ import { Star, ShoppingCart, Heart, Minus, Plus, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { FaLeaf, FaSeedling, FaRecycle } from 'react-icons/fa';
+import { FaLeaf, FaSeedling, FaRecycle, FaTruck } from 'react-icons/fa';
 
 const ProductCard = React.memo(({ product }) => {
   const { user } = useAuth();
@@ -21,7 +21,8 @@ const ProductCard = React.memo(({ product }) => {
 
   const productData = useMemo(() => {
     const {
-      images = [],
+      images: imagesArr = [],
+      image: imageSingle = null,
       name = 'Product Name',
       price = 0,
       _id: productId = product?.id || '',
@@ -29,17 +30,21 @@ const ProductCard = React.memo(({ product }) => {
       reviews = 0,
       description = '',
       stock = 0,
+      countInStock = 0,
       originalPrice,
       quantity: productQuantity,
       available,
       inStock
     } = product || {};
 
-    const actualStock =
-      stock || productQuantity || (available ? 100 : 0) || (inStock ? 100 : 0) || 10;
+    // Support both `images` array (legacy) and `image` string (current model)
+    const images = imagesArr.length > 0 ? imagesArr : (imageSingle ? [imageSingle] : []);
 
-    const primaryImage = images[0] || 'https://via.placeholder.com/400x400?text=No+Image';
-    const fallbackImage = 'https://via.placeholder.com/400x400?text=Product+Image';
+    const actualStock =
+      stock || countInStock || productQuantity || (available ? 100 : 0) || (inStock ? 100 : 0) || 10;
+
+    const primaryImage = images[0] || 'https://placehold.co/400x400/d4edda/155724?text=Nashma';
+    const fallbackImage = 'https://placehold.co/400x400/d4edda/155724?text=Product';
 
     return {
       images,
@@ -209,16 +214,11 @@ const ProductCard = React.memo(({ product }) => {
         )}
 
         <div className="mt-auto">
+          {/* Price on Delivery badge + quantity */}
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-baseline gap-2">
-              <span className="font-bold text-xl text-green-900">
-                {formatPrice(productData.price)}
-              </span>
-              {productData.isOnSale && (
-                <span className="text-sm text-gray-500 line-through">
-                  {formatPrice(productData.originalPrice)}
-                </span>
-              )}
+            <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5">
+              <FaTruck className="w-3.5 h-3.5 text-amber-600" />
+              <span className="text-xs font-semibold text-amber-700">Price on Delivery</span>
             </div>
 
             {!productData.isOutOfStock && (

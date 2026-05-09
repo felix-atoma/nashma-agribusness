@@ -31,9 +31,13 @@ class ApiClient {
       }
     }
 
+    // Always read the latest token — in-memory may be stale after page reload
+    const currentToken = this.token || localStorage.getItem("token");
+    if (currentToken && !this.token) this.token = currentToken;
+
     const headers = {
       "Content-Type": "application/json",
-      ...(this.token && { Authorization: `Bearer ${this.token}` }),
+      ...(currentToken && { Authorization: `Bearer ${currentToken}` }),
       ...options.headers,
     };
 
@@ -55,6 +59,12 @@ class ApiClient {
         );
         error.status = response.status;
         error.data = errorData;
+
+        // If token is rejected, clear it so the user gets redirected to login
+        if (response.status === 401) {
+          this.setAuthToken(null);
+        }
+
         throw error;
       }
 
@@ -224,6 +234,19 @@ async updatePassword(passwords) {
     return this.transformCartResponse(response);
   }
 
+  async addManyToCart(items) {
+    // items: [{ productId, quantity }]
+    const results = [];
+    for (const { productId, quantity = 1 } of items) {
+      const response = await this.request("/cart", {
+        method: "POST",
+        body: { productId, quantity },
+      });
+      results.push(this.transformCartResponse(response));
+    }
+    return results[results.length - 1];
+  }
+
   async removeFromCart(productId) {
     const normalizedId = typeof productId === "object" ? productId._id || productId.id : productId;
     
@@ -244,10 +267,11 @@ async updatePassword(passwords) {
   }
 
   async updateCartItem(productId, quantity) {
+    // Backend expects bulk format: PATCH /cart/items { items: [{productId, quantity}] }
     try {
-      const response = await this.request(`/cart/items/${productId}`, {
+      const response = await this.request("/cart/items", {
         method: "PATCH",
-        body: { quantity }
+        body: { items: [{ productId, quantity }] },
       });
       return this.transformCartResponse(response);
     } catch (error) {
@@ -260,8 +284,30 @@ async updatePassword(passwords) {
     }
   }
 
+  async updateCartItems(items) {
+    // items: [{ productId, quantity }]
+    const response = await this.request("/cart/items", {
+      method: "PATCH",
+      body: { items },
+    });
+    return this.transformCartResponse(response);
+  }
+
   async clearCart() {
     const response = await this.request("/cart/clear", { method: "DELETE" });
+    return this.transformCartResponse(response);
+  }
+
+  async applyCoupon(code) {
+    const response = await this.request("/cart/coupon", {
+      method: "POST",
+      body: { couponCode: code },
+    });
+    return this.transformCartResponse(response);
+  }
+
+  async removeCoupon() {
+    const response = await this.request("/cart/coupon", { method: "DELETE" });
     return this.transformCartResponse(response);
   }
 

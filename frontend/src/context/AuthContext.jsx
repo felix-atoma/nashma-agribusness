@@ -159,34 +159,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Google authentication
+  // Google authentication — returns user, caller handles navigation
   const handleGoogleLogin = async (googleData) => {
     if (authState.loading) return;
-    
+
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await authService.googleLogin(googleData.access_token);
-      
+
       if (response.success) {
-        const user = await handleAuthSuccess(response, 'Logged in successfully with Google!');
-        
-        const redirectTo = location.state?.from?.pathname || '/';
-        navigate(redirectTo, { replace: true });
+        const user = await handleAuthSuccess(response, 'Logged in with Google!');
         return user;
       }
-      
+
       throw new Error(response.message || 'Google login failed');
     } catch (error) {
       console.error('Google login error:', error);
-      
-      let errorMessage = 'Google login failed';
-      if (error.message.includes('Invalid Google token')) {
-        errorMessage = 'Google authentication failed. Please try again.';
-      } else if (error.status === 401) {
-        errorMessage = 'Google authentication is not configured.';
-      }
-      
+
+      const errorMessage = error.message.includes('Invalid Google token')
+        ? 'Google authentication failed. Please try again.'
+        : error.status === 401
+        ? 'Google authentication is not configured.'
+        : 'Google login failed';
+
       setAuthState(prev => ({ ...prev, loading: false, error: error.message }));
       toast.error(errorMessage);
       throw error;

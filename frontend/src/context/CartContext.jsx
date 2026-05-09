@@ -453,7 +453,10 @@ export const CartProvider = ({ children }) => {
 
       // API call
       await apiClient.clearCart();
-      
+
+      // Sync with server to guarantee UI is correct
+      await fetchCart();
+
       toast.success('Cart cleared');
       return true;
     } catch (error) {
@@ -465,7 +468,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       clearOperation();
     }
-  }, [user, operationInProgress, cart, setOperationWithTimeout, clearOperation]);
+  }, [user, operationInProgress, cart, fetchCart, setOperationWithTimeout, clearOperation]);
 
   const applyCoupon = useCallback(
     async (code) => {

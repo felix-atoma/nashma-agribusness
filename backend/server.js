@@ -116,7 +116,8 @@ const io = new Server(httpServer, {
 // ============================================
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
 }));
 
 app.use(cookieParser());
@@ -150,7 +151,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 // ⏱️ REQUEST TIMEOUT HANDLING
 // ============================================
 app.use((req, res, next) => {
-  res.setTimeout(10000, () => {
+  const timeoutMs = req.path.startsWith('/api/orders') ? 45000 : 15000;
+  res.setTimeout(timeoutMs, () => {
     if (!res.headersSent) {
       res.status(504).json({ error: 'Request timeout' });
     }
@@ -219,7 +221,6 @@ const routeConfigs = [
   { path: '/api/contact', file: './routes/contactRoutes' },
   { path: '/api/newsletter', file: './routes/newsletterRoutes' },
   { path: '/api/orders', file: './routes/orderRoutes' },
-  { path: '/api/payment', file: './routes/payment' },
   {
     path: '/api/admin',
     file: './routes/adminRoutes',

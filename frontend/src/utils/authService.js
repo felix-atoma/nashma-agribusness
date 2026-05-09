@@ -65,35 +65,10 @@ export const authService = {
     }
   },
   
-  // Google authentication with development fallback
   async googleLogin(accessToken) {
-    // Development fallback
-    if (import.meta.env.DEV) {
-      console.warn('Using development fallback for Google login');
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      return {
-        success: true,
-        data: {
-          token: 'dev-google-token-' + Date.now(),
-          user: {
-            id: 'google-user-' + Date.now(),
-            email: 'google.user@example.com',
-            firstName: 'Google',
-            lastName: 'User',
-            avatar: null,
-            role: 'user',
-            isGoogleAuth: true
-          }
-        }
-      };
-    }
-    
-    // Production call
     return apiClient.request('/auth/google', {
       method: 'POST',
-      body: { token: accessToken }
+      body: { token: accessToken },
     });
   },
   

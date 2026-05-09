@@ -1,60 +1,67 @@
-// components/CartSummary.jsx
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
+import { ShoppingBag, Truck, Phone } from 'lucide-react';
 
 const CartSummary = () => {
-  const { cart, removeCoupon } = useCart();
+  const { cart } = useCart();
 
-  // Add this useEffect to debug and verify cart updates
-  React.useEffect(() => {
-    console.log('CartSummary: Cart updated', cart);
-  }, [cart]);
+  const itemCount = cart?.itemCount ?? 0;
 
   return (
-    <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-      <h3 className="font-bold text-lg mb-5">Order Summary</h3>
-      
-      <div className="space-y-3">
-        <div className="flex justify-between text-gray-700">
-          <span>Subtotal ({cart.itemCount} items)</span>
-          <span>${cart.subtotal.toFixed(2)}</span>
+    <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="px-6 pt-6 pb-4 border-b border-gray-50">
+        <h3 className="font-bold text-lg text-gray-900">Order Summary</h3>
+      </div>
+
+      <div className="px-6 py-5 space-y-4">
+        {/* Item count */}
+        <div className="flex justify-between text-gray-600 text-sm">
+          <span>Total items</span>
+          <span className="font-semibold text-gray-900">
+            {itemCount} {itemCount === 1 ? 'item' : 'items'}
+          </span>
         </div>
-        
-        {cart.discount > 0 && (
-          <>
-            <div className="flex justify-between text-green-600">
-              <span>Discount</span>
-              <span>-${cart.discount.toFixed(2)}</span>
+
+        {/* Delivery info */}
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 space-y-2">
+          <div className="flex items-start gap-2.5">
+            <Truck className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Payment on Delivery</p>
+              <p className="text-xs text-amber-600 mt-0.5">
+                Prices are confirmed when your order is delivered. No upfront payment required.
+              </p>
             </div>
-            <div className="flex justify-between items-center bg-green-50 px-3 py-2 rounded-lg">
-              <span className="text-sm font-medium text-green-800">
-                {cart.coupon?.code}
-              </span>
-              <button 
-                onClick={removeCoupon}
-                className="text-red-500 text-sm font-medium hover:text-red-700 transition-colors"
-              >
-                Remove
-              </button>
+          </div>
+          <div className="flex items-start gap-2.5">
+            <Phone className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs text-amber-700">
+                Our team will contact you to confirm your order and arrange delivery.
+              </p>
             </div>
-          </>
-        )}
-        
-        <div className="border-t border-gray-200 pt-3 mt-3">
-          <div className="flex justify-between font-bold text-lg">
-            <span>Total</span>
-            <span>${cart.total.toFixed(2)}</span>
           </div>
         </div>
       </div>
-      
-      <Link
-        to="/checkout"
-        className="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors mt-6"
-      >
-        Proceed to Checkout
-      </Link>
+
+      {/* CTA */}
+      <div className="px-6 pb-6">
+        <Link
+          to="/checkout"
+          className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3.5 px-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
+        >
+          <ShoppingBag className="w-4 h-4" />
+          Place Order — Pay on Delivery
+        </Link>
+        <Link
+          to="/products"
+          className="block w-full text-center text-xs text-gray-400 hover:text-green-600 transition-colors mt-3"
+        >
+          ← Continue Shopping
+        </Link>
+      </div>
     </div>
   );
 };

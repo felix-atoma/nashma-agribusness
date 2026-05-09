@@ -38,9 +38,13 @@ const productSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Add any virtual properties or methods here if needed
 productSchema.virtual('formattedPrice').get(function() {
-  return `$${this.price.toFixed(2)}`;
+  return `GH₵${this.price.toFixed(2)}`;
+});
+
+// Frontend compatibility: ProductCard expects an `images` array
+productSchema.virtual('images').get(function() {
+  return this.image ? [this.image] : [];
 });
 
 const Product = mongoose.model('Product', productSchema);

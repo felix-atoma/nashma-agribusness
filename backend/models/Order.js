@@ -122,25 +122,7 @@ const orderSchema = new mongoose.Schema(
       },
     },
 
-    // Paystack details
-    paystackDetails: {
-      reference: { 
-        type: String, 
-        trim: true,
-        sparse: true // Allows null values but maintains uniqueness for non-null
-      },
-      accessCode: { 
-        type: String, 
-        trim: true 
-      },
-      paymentStatus: {
-        type: String,
-        enum: ["pending", "success", "failed", "abandoned"],
-        default: "pending",
-      },
-    },
-
-    mobileNumber: { 
+    mobileNumber: {
       type: String, 
       trim: true 
     },
@@ -157,8 +139,8 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["pending", "paid", "shipped", "completed", "cancelled"],
-        message: "Status must be one of: pending, paid, shipped, completed, cancelled",
+        values: ["pending", "confirmed", "shipped", "completed", "cancelled"],
+        message: "Status must be one of: pending, confirmed, shipped, completed, cancelled",
       },
       default: "pending",
     },
@@ -197,63 +179,22 @@ orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ "items.product": 1 });
 orderSchema.index({ "momoDetails.transactionId": 1 });
-orderSchema.index({ "paystackDetails.reference": 1 });
 
 // Virtual for order ID display
 orderSchema.virtual("orderNumber").get(function () {
   return this._id.toString().slice(-8).toUpperCase();
 });
 
-// Virtual for payment status display
 orderSchema.virtual("paymentStatusDisplay").get(function () {
-  if (this.paymentMethod === "momo") {
-    return this.momoDetails.paymentStatus;
-  }
-  if (this.paymentMethod === "card") {
-    return this.paystackDetails.paymentStatus;
-  }
+  if (this.paymentMethod === "momo") return this.momoDetails?.paymentStatus || "pending";
   return this.isPaid ? "paid" : "pending";
 });
 
-// Pre-save middleware to update timestamps based on status
 orderSchema.pre("save", function (next) {
-  if (this.isModified("status")) {
-    if (this.status === "paid" && !this.isPaid) {
-      this.isPaid = true;
-      this.paidAt = new Date();
-    }
-    if (this.status === "completed" && !this.isDelivered) {
-      this.isDelivered = true;
-      this.deliveredAt = new Date();
-    }
+  if (this.isModified("status") && this.status === "completed" && !this.isDelivered) {
+    this.isDelivered = true;
+    this.deliveredAt = new Date();
   }
-
-  // Update payment status for momo orders
-  if (this.paymentMethod === "momo" && this.isModified("momoDetails.paymentStatus")) {
-    if (this.momoDetails.paymentStatus === "success" && !this.isPaid) {
-      this.isPaid = true;
-      this.paidAt = new Date();
-      this.status = "paid";
-    } else if (this.momoDetails.paymentStatus === "failed" && this.isPaid) {
-      this.isPaid = false;
-      this.paidAt = undefined;
-      this.status = "pending";
-    }
-  }
-
-  // Update payment status for Paystack orders
-  if (this.paymentMethod === "card" && this.isModified("paystackDetails.paymentStatus")) {
-    if (this.paystackDetails.paymentStatus === "success" && !this.isPaid) {
-      this.isPaid = true;
-      this.paidAt = new Date();
-      this.status = "paid";
-    } else if (["failed", "abandoned"].includes(this.paystackDetails.paymentStatus) && this.isPaid) {
-      this.isPaid = false;
-      this.paidAt = undefined;
-      this.status = "pending";
-    }
-  }
-
   next();
 });
 

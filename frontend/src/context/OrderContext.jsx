@@ -117,96 +117,37 @@ export const OrderProvider = ({ children }) => {
         state: orderData.shippingAddress.state,
         zipCode: orderData.shippingAddress.zipCode,
         country: orderData.shippingAddress.country,
-        paymentMethod: orderData.paymentMethod,
+        paymentMethod: 'cod',
         mobileNumber: orderData.shippingAddress.phone,
         items: orderData.items,
         subtotal: orderData.subtotal,
         total: orderData.totalPrice,
         cartId: cart?._id || null,
-        userId: user._id || user.id
+        userId: user._id || user.id,
       };
 
-      // Show loading toast
-      const loadingToast = toast.loading('Placing your order...', {
-        position: 'bottom-right'
-      });
+      const loadingToast = toast.loading('Placing your order...', { position: 'bottom-right' });
 
       const response = await apiClient.createOrder(formattedOrderData);
-      
-      console.log('Order creation response:', response);
-      
+
       if (!response.success) {
         throw new Error(response.message || response.data?.message || "Failed to place order");
       }
 
-      // Extract order data from different possible response structures
       const newOrder = response.data?.order || response.data || response;
-      
-      // Add the new order to the beginning of the list
-      if (newOrder) {
-        setOrders(prev => [newOrder, ...prev]);
-      }
 
-      // Don't clear cart immediately for Paystack payments - wait for payment confirmation
-      if (orderData.paymentMethod === 'cod' && clearCart) {
-        clearCart();
-      }
+      if (newOrder) setOrders(prev => [newOrder, ...prev]);
+      if (clearCart) clearCart();
 
-      // Handle payment response - check for paymentRequired in different response structures
-      const paymentRequired = response.paymentRequired || 
-                             response.data?.paymentRequired || 
-                             (response.data?.data && response.data.data.paymentRequired);
-      
-      const paymentUrl = response.paymentUrl || 
-                         response.data?.paymentUrl || 
-                         (response.data?.data && response.data.data.paymentUrl);
-      
-      const reference = response.reference || 
-                        response.data?.reference || 
-                        (response.data?.data && response.data.data.reference);
+      toast.update(loadingToast, {
+        render: 'Order placed successfully!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 3000,
+        position: 'bottom-right',
+      });
 
-      // Update toast based on payment method
-      if (paymentRequired) {
-        toast.update(loadingToast, {
-          render: 'Order created. Redirecting to payment...',
-          type: 'info',
-          isLoading: false,
-          autoClose: 3000,
-          position: 'bottom-right'
-        });
-        
-        // Return the full response including payment details
-        return {
-          success: true,
-          paymentRequired: true,
-          paymentUrl: paymentUrl,
-          reference: reference,
-          data: {
-            order: newOrder
-          }
-        };
-      } else {
-        // For COD orders, clear cart and show success
-        if (clearCart) {
-          clearCart();
-        }
-        
-        toast.update(loadingToast, {
-          render: 'Order placed successfully!',
-          type: 'success',
-          isLoading: false,
-          autoClose: 3000,
-          position: 'bottom-right'
-        });
-
-        return {
-          success: true,
-          paymentRequired: false,
-          data: {
-            order: newOrder
-          }
-        };
-      }
+      return { success: true, data: { order: newOrder } };
 
     } catch (error) {
       console.error('Order placement failed:', error);

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn, RefreshCw } from 'lucide-react';
 import { FaLeaf, FaSeedling } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import AuthFormWrapper from './AuthFormWrapper';
 import GoogleLoginButton from '../components/GoogleLoginButton';
+import { googleOAuthEnabled } from '../App';
 import toast from '../utils/toast';
 
 const Login = () => {
@@ -16,6 +17,8 @@ const Login = () => {
   const [animated, setAnimated] = useState(false);
   const { login, loading, handleGoogleLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || location.state?.from || '/';
 
   useEffect(() => {
     setAnimated(true);
@@ -33,8 +36,9 @@ const Login = () => {
   const handleGoogleSuccess = async (googleData) => {
     try {
       await handleGoogleLogin(googleData);
+      navigate(from, { replace: true });
     } catch (error) {
-      toast.error('Google login failed');
+      // toast shown by handleGoogleLogin
     }
   };
 
@@ -118,9 +122,20 @@ const Login = () => {
       {/* Main Content */}
       <div className="relative z-10 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          {/* Back to site */}
+          <div className="mb-4 text-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm text-green-700 hover:text-green-900 transition-colors"
+            >
+              <span>←</span>
+              <span>Back to site</span>
+            </Link>
+          </div>
+
           {/* Agricultural Branding Header */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-lg border border-green-200 mb-4">
+            <Link to="/" className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl shadow-lg border border-green-200 mb-4 hover:shadow-xl transition-shadow">
               <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-amber-500 rounded-xl flex items-center justify-center">
                 <FaLeaf className="w-6 h-6 text-white" />
               </div>
@@ -128,7 +143,7 @@ const Login = () => {
                 <div className="font-bold text-green-900 text-lg">Nashma Agribusiness</div>
                 <div className="text-green-600 text-sm">Welcome Back to Our Community</div>
               </div>
-            </div>
+            </Link>
           </div>
 
           <div className={`bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-green-200 p-8 transition-all duration-1000 ${
@@ -147,21 +162,24 @@ const Login = () => {
               </p>
             </div>
 
-            <GoogleLoginButton
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleFailure}
-              text="Continue with Google"
-              loading={loading}
-            />
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-green-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-green-600 font-medium">Or continue with email</span>
-              </div>
-            </div>
+            {googleOAuthEnabled && (
+              <>
+                <GoogleLoginButton
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleFailure}
+                  text="Continue with Google"
+                  loading={loading}
+                />
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-green-200" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-3 bg-white text-green-600 font-medium">Or continue with email</span>
+                  </div>
+                </div>
+              </>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>

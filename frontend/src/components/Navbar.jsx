@@ -17,11 +17,11 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
   const serviceItems = [
-    { name: "Cocoa Potash Production", path: "/services", icon: <FaRecycle className="w-4 h-4" />, color: "text-green-600" },
-    { name: "African Black Soap", path: "/services", icon: <FaFlask className="w-4 h-4" />, color: "text-amber-600", isNew: true },
-    { name: "Women & Youth Training", path: "/services", icon: <FaGraduationCap className="w-4 h-4" />, color: "text-rose-600" },
-    { name: "Global Bulk Supply", path: "/services", icon: <FaGlobe className="w-4 h-4" />, color: "text-blue-600" },
-    { name: "Farming Workshops", path: "/services", icon: <FaLeaf className="w-4 h-4" />, color: "text-teal-600" },
+    { name: "Cocoa Potash Production", path: "/services/cocoa-potash", icon: <FaRecycle className="w-4 h-4" />, color: "text-green-600" },
+    { name: "African Black Soap", path: "/services/african-black-soap", icon: <FaFlask className="w-4 h-4" />, color: "text-amber-600", isNew: true },
+    { name: "Women & Youth Training", path: "/services/women-youth-training", icon: <FaGraduationCap className="w-4 h-4" />, color: "text-rose-600" },
+    { name: "Global Bulk Supply", path: "/services/global-bulk-supply", icon: <FaGlobe className="w-4 h-4" />, color: "text-blue-600" },
+    { name: "Farming Workshops", path: "/services/farming-workshops", icon: <FaLeaf className="w-4 h-4" />, color: "text-teal-600" },
   ];
 
   const { cart, loading: cartLoading } = useCart();
@@ -203,7 +203,7 @@ const Navbar = () => {
               <button
                 onClick={() => setServicesOpen((v) => !v)}
                 className={`flex items-center gap-1 px-4 py-2 rounded-lg font-semibold text-green-800 hover:text-green-900 transition-all duration-300 ${
-                  location.pathname === "/services"
+                  location.pathname.startsWith("/services")
                     ? "bg-green-100 text-green-900"
                     : "hover:bg-green-50"
                 }`}

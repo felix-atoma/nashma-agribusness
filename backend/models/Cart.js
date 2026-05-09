@@ -97,13 +97,5 @@ cartSchema.pre('save', function(next) {
   next();
 });
 
-// Query middleware to always populate basic product info
-cartSchema.pre(/^find/, function(next) {
-  this.populate({
-    path: 'items.product',
-    select: 'name price image countInStock status slug'
-  });
-  next();
-});
 
 module.exports = mongoose.model('Cart', cartSchema);

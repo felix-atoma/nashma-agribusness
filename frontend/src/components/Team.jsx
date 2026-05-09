@@ -156,18 +156,12 @@ const Team = () => {
               <p className="text-green-100 mb-6 leading-relaxed max-w-2xl mx-auto">
                 At Nashma Agribusiness Ltd., we're always looking for passionate individuals who share our commitment to sustainable agriculture and innovation. If you're interested in joining our team, we'd love to hear from you.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <a
                   href="/contact"
                   className="inline-flex items-center justify-center bg-amber-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Join Our Team
-                </a>
-                <a
-                  href="/careers"
-                  className="inline-flex items-center justify-center bg-white text-green-700 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-all duration-300 border border-green-200"
-                >
-                  View Openings
+                  Contact Us
                 </a>
               </div>
             </div>

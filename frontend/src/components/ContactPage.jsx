@@ -8,7 +8,7 @@ const ContactPage = () => {
       icon: <FiPhone className="w-6 h-6" />,
       label: "Phone",
       value: "(+233) 0545086577 / 0243241649",
-      subValue: "Mon-Fri: 8:00 AM - 6:00 PM",
+      subValue: "Mon-Fri: 8:00 AM - 5:00 PM",
       color: "from-green-500 to-emerald-500",
       bgColor: "bg-green-50",
       href: "tel:+2330545086577"

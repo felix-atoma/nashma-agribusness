@@ -3,33 +3,41 @@ import { FaUsers, FaGraduationCap, FaWheelchair, FaRecycle, FaSeedling, FaChartL
 
 const AgribusinessCounter = () => {
   const stats = [
-    { 
-      number: 500, 
-      text: "Women Empowered", 
+    {
+      number: 5,
+      text: "Farmers Served",
+      icon: <FaSeedling className="w-6 h-6" />,
+      color: "from-green-500 to-emerald-500",
+      bgColor: "bg-green-50",
+      textColor: "text-green-700"
+    },
+    {
+      number: 20,
+      text: "Women Empowered",
       icon: <FaUsers className="w-6 h-6" />,
       color: "from-pink-500 to-rose-500",
       bgColor: "bg-pink-50",
       textColor: "text-pink-700"
     },
-    { 
-      number: 300, 
-      text: "Youth Trained", 
+    {
+      number: 10,
+      text: "Youth Trained",
       icon: <FaGraduationCap className="w-6 h-6" />,
       color: "from-blue-500 to-cyan-500",
       bgColor: "bg-blue-50",
       textColor: "text-blue-700"
     },
-    { 
-      number: 150, 
-      text: "Disabilities Supported", 
+    {
+      number: 2,
+      text: "Persons with Disability Supported",
       icon: <FaWheelchair className="w-6 h-6" />,
       color: "from-purple-500 to-indigo-500",
       bgColor: "bg-purple-50",
       textColor: "text-purple-700"
     },
-    { 
-      number: 1000, 
-      text: "Tons of Cocoa Waste Recycled", 
+    {
+      number: 5,
+      text: "Tonnes of Cocoa Waste Recycled",
       icon: <FaRecycle className="w-6 h-6" />,
       color: "from-amber-500 to-orange-500",
       bgColor: "bg-amber-50",
@@ -60,7 +68,7 @@ const AgribusinessCounter = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8">
           {stats.map((stat, index) => (
             <div 
               key={index} 

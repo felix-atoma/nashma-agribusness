@@ -81,7 +81,7 @@ const structuredData = {
       'priceRange': '$$',
       'currenciesAccepted': 'GHS',
       'paymentAccepted': 'Cash, Mobile Money, Bank Transfer',
-      'openingHours': ['Mo-Fr 08:00-18:00', 'Sa 09:00-14:00'],
+      'openingHours': ['Mo-Fr 08:00-17:00', 'Sa 09:00-14:00'],
       'telephone': '+233545086577',
       'address': {
         '@type': 'PostalAddress',

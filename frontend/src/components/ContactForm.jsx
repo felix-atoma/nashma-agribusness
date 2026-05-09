@@ -107,7 +107,7 @@ const ContactForm = () => {
     {
       icon: <FaClock className="w-6 h-6" />,
       title: "Business Hours",
-      details: ["Monday - Friday: 8:00 AM - 6:00 PM", "Saturday: 9:00 AM - 2:00 PM"],
+      details: ["Monday - Friday: 8:00 AM - 5:00 PM", "Saturday: 9:00 AM - 2:00 PM"],
       color: "from-purple-500 to-indigo-500"
     }
   ];
@@ -335,7 +335,7 @@ const ContactForm = () => {
             {[
               { icon: <FaMapMarkerAlt className="w-5 h-5 text-green-600" />, label: "Address", value: "Apemso-KNUST, Kumasi" },
               { icon: <FaPhone className="w-5 h-5 text-green-600" />, label: "Phone", value: "(+233) 0545086577" },
-              { icon: <FaClock className="w-5 h-5 text-green-600" />, label: "Hours", value: "Mon–Fri 8 AM – 6 PM" },
+              { icon: <FaClock className="w-5 h-5 text-green-600" />, label: "Hours", value: "Mon–Fri 8 AM – 5 PM" },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-3 bg-green-50 rounded-xl p-4 border border-green-100">
                 <div className="p-2 bg-white rounded-lg shadow-sm">{item.icon}</div>

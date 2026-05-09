@@ -23,11 +23,11 @@ const nashmaProducts = [
     status: 'active',
   },
   {
-    name: 'Cocoa Potash Raw Blocks (1kg)',
+    name: 'African Black Soap (1kg)',
     description:
-      'Traditional handcrafted raw cocoa potash blocks from Nashma Agribusiness. Each pack contains approximately 1kg of individually wrapped potash blocks. 100% natural, no additives. Perfect for home cooking, soup making, soap production, and fabric dyeing.',
+      'Handcrafted traditional African Black Soap (Alata Samina) produced by Nashma Agribusiness Ltd. Made from cocoa potash, shea butter, palm oil and plantain ash — 100% natural, no synthetic additives. Benefits: deep cleansing, soothes eczema and acne, natural moisturising. Suitable for face, body and hair. Supplied in 1kg blocks.',
     price: 0,
-    countInStock: 300,
+    countInStock: 200,
     image: '/cocoa-potash-raw-blocks.jpg',
     status: 'active',
   },
@@ -42,10 +42,19 @@ const nashmaProducts = [
   },
 ];
 
+// Products that were renamed — remove old entries so they don't linger
+const oldNames = ['Cocoa Potash Raw Blocks (1kg)'];
+
 const seed = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
+
+    // Remove renamed products
+    for (const oldName of oldNames) {
+      const deleted = await Product.findOneAndDelete({ name: oldName });
+      if (deleted) console.log(`🗑️  Removed old product: ${oldName}`);
+    }
 
     for (const p of nashmaProducts) {
       const updated = await Product.findOneAndUpdate(

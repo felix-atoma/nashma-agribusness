@@ -35,6 +35,7 @@ import CreateProduct from './pages/CreateProduct';
 import ManageProducts from './pages/ManageProducts';
 import ProductDetail from './pages/ProductDetail';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Orders from './pages/Orders';
 import NotFound from './pages/NotFound';
 import CheckoutPage from './pages/CheckoutPage';
@@ -84,6 +85,7 @@ function App() {
 
                     <Route element={<ProtectedRoute />}>
                       <Route path="profile" element={<Profile />} />
+                      <Route path="settings" element={<Settings />} />
                       <Route path="orders" element={<Orders />} />
                     </Route>
                   </Route>

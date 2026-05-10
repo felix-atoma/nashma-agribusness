@@ -19,7 +19,7 @@ const Footer = () => {
     }
 
     try {
-      const apiBase = import.meta.env?.VITE_API_BASE_URL?.trim() || "https://nashma-backend-1-1.onrender.com/api";
+      const apiBase = import.meta.env?.VITE_API_BASE_URL?.trim() || "https://nashma-agribusness.onrender.com/api";
       const res = await fetch(`${apiBase}/newsletter`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -110,7 +110,7 @@ const Footer = () => {
             </div>
             <p className="text-green-200 mb-6 leading-relaxed">
               Transforming agriculture in Ghana through sustainable practices, 
-              innovative solutions, and community empowerment since 2014.
+              innovative solutions, and community empowerment since 2024.
             </p>
             
             {/* Contact Info */}

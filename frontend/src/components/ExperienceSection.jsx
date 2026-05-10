@@ -61,7 +61,7 @@ const ExperienceSection = () => {
                   <FaHistory className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-800">10+</p>
+                  <p className="text-2xl font-bold text-green-800">5+</p>
                   <p className="text-sm text-green-600">Years Experience</p>
                 </div>
               </div>
@@ -73,7 +73,7 @@ const ExperienceSection = () => {
                   <FaUsers className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-amber-800">500+</p>
+                  <p className="text-2xl font-bold text-amber-800">5+</p>
                   <p className="text-sm text-amber-600">Farmers Served</p>
                 </div>
               </div>
@@ -86,11 +86,11 @@ const ExperienceSection = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
             <FaSeedling className="w-4 h-4" />
-            Trusted Since 2014
+            Trusted Since 2024
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold text-green-900 mb-6 leading-tight">
-            Over <span className="text-amber-600">10 Years</span> of Agricultural Excellence
+            Over <span className="text-amber-600">5 Years</span> of Agricultural Excellence
           </h2>
           
           <div className="w-20 h-1 bg-amber-500 mb-8 mx-auto lg:mx-0"></div>

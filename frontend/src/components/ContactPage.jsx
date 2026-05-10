@@ -74,7 +74,7 @@ const ContactPage = () => {
             {/* Quick Stats */}
             <div className="mt-8 grid grid-cols-3 gap-4">
               <div className="text-center p-4 bg-white rounded-xl shadow-lg border border-green-100">
-                <p className="text-2xl font-bold text-green-700">10+</p>
+                <p className="text-2xl font-bold text-green-700">5+</p>
                 <p className="text-xs text-green-600">Years Experience</p>
               </div>
               <div className="text-center p-4 bg-white rounded-xl shadow-lg border border-amber-100">

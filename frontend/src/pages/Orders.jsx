@@ -207,7 +207,7 @@ const Orders = () => {
   };
 
   const handleReturnOrder = () => {
-    toast.info('Return process initiated. Our support team will contact you shortly.');
+    toast.success('Return process initiated. Our support team will contact you shortly.');
   };
 
   const handleReorder = () => {

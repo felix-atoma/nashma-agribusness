@@ -378,7 +378,7 @@ export const CartProvider = ({ children }) => {
         if (error.status === 404) {
           // Item not found in cart, sync with server
           await fetchCart();
-          toast.info('Item was already removed from cart');
+          toast.success('Item was already removed from cart');
           return true;
         }
         
@@ -426,7 +426,7 @@ export const CartProvider = ({ children }) => {
         if (error.status === 404) {
           // Some items not found in cart, sync with server
           await fetchCart();
-          toast.info('Cart has been synchronized');
+          toast.success('Cart has been synchronized');
           return true;
         }
         

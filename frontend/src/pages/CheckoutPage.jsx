@@ -51,7 +51,7 @@ export default function CheckoutPage() {
   // Redirect unauthenticated users
   useEffect(() => {
     if (initialized && !isAuthenticated) {
-      toast.info('Please log in to place your order');
+      toast.error('Please log in to place your order');
       navigate('/login', { state: { from: '/checkout' } });
     }
   }, [initialized, isAuthenticated, navigate]);

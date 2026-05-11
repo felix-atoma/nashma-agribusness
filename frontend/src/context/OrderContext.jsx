@@ -40,20 +40,6 @@ export const OrderProvider = ({ children }) => {
         
         console.log('Processed orders data:', ordersData);
         setOrders(ordersData);
-        
-        // Show toast message if no orders found
-        if (ordersData.length === 0) {
-          toast.info('No orders found. Start shopping to place your first order!', {
-            autoClose: 3000,
-            position: 'bottom-right'
-          });
-        } else {
-          toast.success(`Loaded ${ordersData.length} order(s) successfully!`, {
-            autoClose: 2000,
-            position: 'bottom-right'
-          });
-        }
-        
         return ordersData;
       } else {
         throw new Error(response.message || 'Failed to fetch orders');

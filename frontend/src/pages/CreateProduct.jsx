@@ -1,31 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import apiClient from '../utils/apiClient';
-import { FiSave, FiArrowLeft, FiPackage } from 'react-icons/fi';
-
-const CATEGORIES = [
-  'Cocoa Potash',
-  'African Black Soap',
-  'Farm Inputs',
-  'Training Kits',
-  'Agro-Commodities',
-];
+import { FiSave, FiArrowLeft, FiUploadCloud, FiX } from 'react-icons/fi';
 
 const STATUS_OPTIONS = ['active', 'inactive'];
 
-const EMPTY = { name: '', description: '', price: '', countInStock: '', image: '', status: 'active' };
+const EMPTY = { name: '', description: '', price: '', countInStock: '', status: 'active' };
 
 export default function CreateProduct() {
-  const { id } = useParams();
-  const isEditing = Boolean(id);
-  const navigate  = useNavigate();
+  const { id }     = useParams();
+  const isEditing  = Boolean(id);
+  const navigate   = useNavigate();
+  const fileRef    = useRef(null);
 
-  const [form,    setForm]    = useState(EMPTY);
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const [error,   setError]   = useState('');
+  const [form,         setForm]         = useState(EMPTY);
+  const [imageFile,    setImageFile]    = useState(null);   // new file selected by admin
+  const [imagePreview, setImagePreview] = useState(null);   // data-URL for preview
+  const [existingImg,  setExistingImg]  = useState(null);   // URL stored in DB (edit mode)
+  const [loading,      setLoading]      = useState(false);
+  const [fetching,     setFetching]     = useState(false);
+  const [error,        setError]        = useState('');
 
+  // Load existing product when editing
   useEffect(() => {
     if (!isEditing) return;
     setFetching(true);
@@ -37,9 +34,9 @@ export default function CreateProduct() {
           description:  p.description  || '',
           price:        p.price        != null ? String(p.price) : '',
           countInStock: p.countInStock != null ? String(p.countInStock) : '',
-          image:        p.image        || '',
           status:       p.status       || 'active',
         });
+        setExistingImg(p.image || null);
       })
       .catch(() => setError('Failed to load product details'))
       .finally(() => setFetching(false));
@@ -50,32 +47,52 @@ export default function CreateProduct() {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveFile = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const payload = {
-      name:         form.name.trim(),
-      description:  form.description.trim(),
-      price:        Number(form.price),
-      countInStock: Number(form.countInStock),
-      image:        form.image.trim(),
-      status:       form.status,
-    };
+    // Validate
+    if (!isEditing && !imageFile) {
+      setError('Please select a product image');
+      setLoading(false);
+      return;
+    }
 
     try {
+      const fd = new FormData();
+      fd.append('name',         form.name.trim());
+      fd.append('description',  form.description.trim());
+      fd.append('price',        form.price);
+      fd.append('countInStock', form.countInStock);
+      fd.append('status',       form.status);
+      if (imageFile) fd.append('image', imageFile);
+
       if (isEditing) {
-        await apiClient.put(`/products/${id}`, payload);
+        await apiClient.put(`/products/${id}`, fd);
         toast.success('Product updated successfully');
       } else {
-        await apiClient.post('/products', payload);
+        await apiClient.post('/products', fd);
         toast.success('Product created successfully');
       }
       navigate('/admin/products');
     } catch (err) {
-      const msg = err.data?.message || err.message || `Failed to ${isEditing ? 'update' : 'create'} product`;
-      setError(msg);
+      setError(err.data?.message || err.message || `Failed to ${isEditing ? 'update' : 'create'} product`);
     } finally {
       setLoading(false);
     }
@@ -119,6 +136,74 @@ export default function CreateProduct() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-5">
+
+        {/* Product Image Upload */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Product Image {!isEditing && <span className="text-red-500">*</span>}
+            {isEditing && <span className="text-gray-400 font-normal"> (leave empty to keep current)</span>}
+          </label>
+
+          {/* Preview area */}
+          <div className="flex items-start gap-4">
+            {/* New file preview OR existing image */}
+            <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center flex-shrink-0 relative">
+              {imagePreview ? (
+                <>
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                    title="Remove selected image"
+                  >
+                    <FiX className="w-3 h-3" />
+                  </button>
+                </>
+              ) : existingImg ? (
+                <img
+                  src={existingImg}
+                  alt="Current"
+                  className="w-full h-full object-cover"
+                  onError={e => { e.target.style.display = 'none'; }}
+                />
+              ) : (
+                <div className="text-center px-2">
+                  <FiUploadCloud className="w-8 h-8 text-gray-300 mx-auto mb-1" />
+                  <p className="text-xs text-gray-400">No image</p>
+                </div>
+              )}
+            </div>
+
+            {/* Upload button + instructions */}
+            <div className="flex-1">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="product-image-input"
+              />
+              <label
+                htmlFor="product-image-input"
+                className="inline-flex items-center gap-2 cursor-pointer bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors"
+              >
+                <FiUploadCloud className="w-4 h-4" />
+                {imageFile ? 'Change Image' : isEditing ? 'Upload New Image' : 'Choose Image'}
+              </label>
+              {imageFile && (
+                <p className="text-xs text-gray-500 mt-2 truncate max-w-[180px]">
+                  {imageFile.name}
+                </p>
+              )}
+              <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+                JPG, PNG or WebP · Max 5 MB<br />
+                Auto-resized to 800 × 640 px
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Name */}
         <div>
@@ -186,41 +271,10 @@ export default function CreateProduct() {
           <label className="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
           <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
             {STATUS_OPTIONS.map(s => (
-              <option key={s} value={s} className="capitalize">{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
             ))}
           </select>
         </div>
-
-        {/* Image URL */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1.5">Image URL *</label>
-          <input
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            className={inputClass}
-            placeholder="e.g. /cocoa-potash-1kg.jpg  or  https://…"
-            required
-          />
-          <p className="text-xs text-gray-400 mt-1.5">
-            Use a path like <code className="bg-gray-100 px-1 rounded">/cocoa-potash-1kg.jpg</code> for local images, or paste any full URL.
-          </p>
-        </div>
-
-        {/* Image preview */}
-        {form.image && (
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Preview</label>
-            <div className="w-32 h-32 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-              <img
-                src={form.image}
-                alt="Preview"
-                className="w-full h-full object-cover"
-                onError={e => { e.target.style.display = 'none'; }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">

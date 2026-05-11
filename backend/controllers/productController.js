@@ -41,8 +41,11 @@ const getProductById = async (req, res) => {
 // POST /api/products (admin only)
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, image, status } = req.body;
+    const { name, description, price, status } = req.body;
     const countInStock = req.body.countInStock ?? req.body.stock ?? 0;
+    // Prefer uploaded file URL, fall back to URL string in body
+    const image = req.file?.path || req.body.image;
+    if (!image) return res.status(400).json({ success: false, message: 'Product image is required' });
     const product = await Product.create({ name, description, price, countInStock, image, status });
     res.status(201).json({ success: true, data: { product } });
   } catch (error) {
@@ -53,11 +56,14 @@ const createProduct = async (req, res) => {
 // PUT /api/products/:id (admin only)
 const updateProduct = async (req, res) => {
   try {
-    const allowed = ['name', 'description', 'price', 'image', 'status'];
+    const allowed = ['name', 'description', 'price', 'status'];
     const fields = {};
     allowed.forEach(f => { if (req.body[f] !== undefined) fields[f] = req.body[f]; });
     if (req.body.countInStock !== undefined) fields.countInStock = req.body.countInStock;
     else if (req.body.stock !== undefined) fields.countInStock = req.body.stock;
+    // Only update image if a new file was uploaded or a URL was explicitly provided
+    if (req.file?.path) fields.image = req.file.path;
+    else if (req.body.image) fields.image = req.body.image;
 
     const product = await Product.findByIdAndUpdate(req.params.id, fields, { new: true, runValidators: true });
     if (!product) return res.status(404).json({ success: false, message: 'Product not found' });

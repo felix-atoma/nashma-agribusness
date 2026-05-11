@@ -35,8 +35,11 @@ class ApiClient {
     const currentToken = this.token || localStorage.getItem("token");
     if (currentToken && !this.token) this.token = currentToken;
 
+    const isFormData = options.body instanceof FormData;
+
     const headers = {
-      "Content-Type": "application/json",
+      // Let the browser set Content-Type automatically for FormData (needed for boundary)
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...(currentToken && { Authorization: `Bearer ${currentToken}` }),
       ...options.headers,
     };
@@ -46,7 +49,9 @@ class ApiClient {
       headers,
       signal: controller.signal,
       ...options,
-      body: options.body && typeof options.body === "object" ? JSON.stringify(options.body) : options.body,
+      body: isFormData
+        ? options.body
+        : (options.body && typeof options.body === "object" ? JSON.stringify(options.body) : options.body),
     };
 
     try {

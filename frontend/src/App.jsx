@@ -47,6 +47,7 @@ import GlobalBulkSupplyPage from './pages/GlobalBulkSupplyPage';
 import FarmingWorkshopsPage from './pages/FarmingWorkshopsPage';
 import ProtectedRoute from './pages/ProtectedRoute';
 import AdminRoute from './pages/AdminRoute';
+import AdminOrders from './pages/AdminOrders';
 import LoadingSpinner from './components/LoadingSpinner';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -109,6 +110,7 @@ function App() {
                     <Route path="products/create" element={<CreateProduct />} />
                     <Route path="products/edit/:id" element={<CreateProduct />} />
                     <Route path="products" element={<ManageProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
                   </Route>
 
                   <Route path="not-found" element={<NotFound />} />

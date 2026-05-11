@@ -23,10 +23,10 @@ const About = () => {
   const contentRef = useRef(null);
 
   const impactStats = [
-    { number: 500, label: "Women Empowered", icon: <FaUsers className="w-6 h-6" /> },
-    { number: 300, label: "Youth Trained", icon: <FaChalkboardTeacher className="w-6 h-6" /> },
-    { number: 150, label: "Disabilities Supported", icon: <FaHandsHelping className="w-6 h-6" /> },
-    { number: 1000, label: "Tons Waste Recycled", icon: <FaRecycle className="w-6 h-6" /> },
+    { number: 20, label: "Women Empowered", icon: <FaUsers className="w-6 h-6" /> },
+    { number: 10, label: "Youth Trained", icon: <FaChalkboardTeacher className="w-6 h-6" /> },
+    { number: 2, label: "Disabilities Supported", icon: <FaHandsHelping className="w-6 h-6" /> },
+    { number: 5, label: "Tons Waste Recycled", icon: <FaRecycle className="w-6 h-6" /> },
   ];
 
   const features = [
@@ -280,7 +280,7 @@ const About = () => {
                 <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-2xl p-6 border border-green-100">
                   <div className="text-center">
                     <FaSeedling className="w-8 h-8 text-green-600 mb-2 mx-auto" />
-                    <p className="text-2xl font-bold text-green-800">10+</p>
+                    <p className="text-2xl font-bold text-green-800">5+</p>
                     <p className="text-sm text-green-600 font-medium">Years Experience</p>
                   </div>
                 </div>

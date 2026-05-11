@@ -96,8 +96,8 @@ const ExperienceSection = () => {
           <div className="w-20 h-1 bg-amber-500 mb-8 mx-auto lg:mx-0"></div>
 
           <p className="text-lg md:text-xl text-green-800 leading-relaxed mb-8">
-            With a decade of unwavering dedication to <span className="font-semibold text-green-700">sustainable agriculture</span>, 
-            we've been at the forefront of transforming farming practices in Ghana. Our journey has been marked by 
+            With over 5 years of unwavering dedication to <span className="font-semibold text-green-700">sustainable agriculture</span>,
+            we've been at the forefront of transforming farming practices in Ghana. Our journey has been marked by
             innovation, community empowerment, and a deep commitment to environmental stewardship.
           </p>
 

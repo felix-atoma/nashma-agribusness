@@ -233,6 +233,23 @@ exports.updateOrderStatus = catchAsync(async (req, res, next) => {
   });
 });
 
+// GET /api/admin/orders — all orders (admin only)
+exports.getAllOrders = catchAsync(async (req, res, next) => {
+  const orders = await Order.find()
+    .populate('user', 'firstName lastName email')
+    .populate('items.product', 'name price image')
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const formatted = orders.map(o => ({
+    ...o,
+    _id: o._id.toString(),
+    orderNumber: o._id.toString().slice(-8).toUpperCase(),
+  }));
+
+  res.status(200).json({ success: true, count: formatted.length, data: { orders: formatted } });
+});
+
 // GET order stats (admin)
 exports.getOrderStats = catchAsync(async (req, res, next) => {
   const userId = req.user._id;

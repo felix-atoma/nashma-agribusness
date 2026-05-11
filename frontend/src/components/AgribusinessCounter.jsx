@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaUsers, FaGraduationCap, FaWheelchair, FaRecycle, FaSeedling, FaChartLine } from "react-icons/fa";
+import { FaUsers, FaGraduationCap, FaWheelchair, FaRecycle, FaSeedling, FaChartLine, FaSmile } from "react-icons/fa";
 
 const AgribusinessCounter = () => {
   const stats = [
     {
-      number: 5,
-      text: "Farmers Served",
-      icon: <FaSeedling className="w-6 h-6" />,
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-50",
-      textColor: "text-green-700"
+      number: 10,
+      text: "Happy Clients",
+      icon: <FaSmile className="w-6 h-6" />,
+      color: "from-yellow-400 to-amber-500",
+      bgColor: "bg-yellow-50",
+      textColor: "text-yellow-700"
     },
     {
       number: 20,
@@ -110,7 +110,7 @@ const AgribusinessCounter = () => {
         <div className="text-center mt-12">
           <div className="inline-flex items-center gap-2 text-green-700 bg-green-100 px-6 py-3 rounded-full">
             <FaSeedling className="w-5 h-5 text-green-600" />
-            <span className="font-semibold">Creating sustainable impact since 2014</span>
+            <span className="font-semibold">Creating sustainable impact since 2024</span>
           </div>
         </div>
       </div>

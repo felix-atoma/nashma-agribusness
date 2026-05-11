@@ -380,6 +380,13 @@ async updatePassword(passwords) {
   async subscribeNewsletter(email) {
     return this.request("/newsletter", { method: "POST", body: { email } });
   }
+
+  // Generic HTTP shortcuts
+  get(endpoint, options = {}) { return this.request(endpoint, { method: 'GET', ...options }); }
+  post(endpoint, body, options = {}) { return this.request(endpoint, { method: 'POST', body, ...options }); }
+  put(endpoint, body, options = {}) { return this.request(endpoint, { method: 'PUT', body, ...options }); }
+  delete(endpoint, options = {}) { return this.request(endpoint, { method: 'DELETE', ...options }); }
+  patch(endpoint, body, options = {}) { return this.request(endpoint, { method: 'PATCH', body, ...options }); }
 }
 
 const apiClient = new ApiClient();

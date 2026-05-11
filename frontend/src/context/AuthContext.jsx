@@ -136,20 +136,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     if (authState.loading) return;
-    
+
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      
+
       const response = await authService.login(credentials);
-      
+
       if (response.success) {
         const user = await handleAuthSuccess(response, 'Login successful!');
-        
-        const redirectTo = location.state?.from?.pathname || '/';
-        navigate(redirectTo, { replace: true });
+
+        const from = location.state?.from?.pathname || location.state?.from;
+        if (user?.role === 'admin') {
+          navigate(from || '/admin', { replace: true });
+        } else {
+          navigate(from || '/', { replace: true });
+        }
         return user;
       }
-      
+
       throw new Error(response.message || 'Login failed');
     } catch (error) {
       console.error('Login error:', error);
@@ -328,7 +332,8 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     updatePassword,
     updateProfile,
-    isAuthenticated: !!authState.user
+    isAuthenticated: !!authState.user,
+    isAdmin: () => authState.user?.role === 'admin',
   }), [authState]);
 
   return (

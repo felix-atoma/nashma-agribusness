@@ -139,12 +139,26 @@ const OrderSuccessPage = () => {
                    orderData.paymentMethod || 'Payment on Delivery'}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                <span className="text-gray-600">Amount:</span>
-                <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-sm font-semibold px-3 py-1 rounded-full">
-                  Price confirmed on delivery
-                </span>
-              </div>
+              {(orderData.subtotal > 0 || orderData.total > 0) && (
+                <>
+                  {orderData.subtotal > 0 && (
+                    <div className="flex justify-between pt-2 border-t border-gray-100">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="font-medium">GHS {Number(orderData.subtotal).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {orderData.deliveryFee > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Delivery:</span>
+                      <span className="font-medium">GHS {Number(orderData.deliveryFee).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold border-t border-gray-100 pt-2">
+                    <span className="text-gray-800">Total:</span>
+                    <span className="text-green-700">GHS {Number(orderData.total ?? orderData.totalPrice ?? 0).toFixed(2)}</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -216,9 +230,18 @@ const OrderSuccessPage = () => {
                       <p className="text-sm text-gray-500">Qty: {itemQuantity}</p>
                     </div>
                     <div className="text-right">
-                      <span className="inline-flex items-center text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
-                        Price on delivery
-                      </span>
+                      {item.price > 0 ? (
+                        <>
+                          <p className="font-semibold text-gray-900 text-sm">GHS {(item.price * itemQuantity).toFixed(2)}</p>
+                          {itemQuantity > 1 && (
+                            <p className="text-xs text-gray-400">{itemQuantity} × {Number(item.price).toFixed(2)}</p>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">
+                          Price on delivery
+                        </span>
+                      )}
                     </div>
                   </div>
                 );

@@ -4,6 +4,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
+const orderController = require('../controllers/orderController');
 
 const router = express.Router();
 
@@ -35,5 +36,9 @@ router
 router
   .route('/stats')
   .get(userController.getAdminStats);
+
+router
+  .route('/orders')
+  .get(orderController.getAllOrders);
 
 module.exports = router;

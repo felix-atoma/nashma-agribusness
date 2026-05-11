@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, CheckCircle, Package, Truck, Leaf, ArrowRight, Phone, Mail } from 'lucide-react';
 import { FaRecycle, FaFlask, FaBoxOpen, FaWarehouse, FaSeedling } from 'react-icons/fa';
+import apiClient from '../utils/apiClient';
 
 const steps = [
   { step: '01', title: 'Pod Collection', desc: 'Dry cocoa pods are collected from farms across the growing regions of Ghana.' },
   { step: '02', title: 'Controlled Burning', desc: 'Pods are burned at precise temperatures to produce pure, high-quality potash ash.' },
   { step: '03', title: 'Sieving & Refining', desc: 'The ash is carefully sieved and refined to remove impurities, ensuring consistent quality.' },
   { step: '04', title: 'Quality Testing', desc: 'Every batch is tested for purity, alkalinity and moisture before packaging.' },
-  { step: '05', title: 'Packaging & Dispatch', desc: 'Packed in 1 kg blocks, 5 kg bags or 25 kg sacks and dispatched to customers.' },
+  { step: '05', title: 'Packaging & Dispatch', desc: 'Packed in 1 kg blocks, 5 kg bags, 25 kg or 50 kg sacks and dispatched to customers.' },
 ];
 
 const uses = [
@@ -18,13 +20,47 @@ const uses = [
   { icon: <FaWarehouse className="w-6 h-6" />, title: 'Industrial Use', desc: 'Input for cosmetic manufacturers, food-processing plants and agro-processors.' },
 ];
 
-const products = [
-  { name: 'Raw Blocks (1 kg)', desc: 'Traditional solid form — ideal for households and soap makers.', icon: '🧱' },
-  { name: 'Packaged Bags (5 kg)', desc: 'Convenience-sized bags for small businesses and workshops.', icon: '🛍️' },
-  { name: 'Bulk Sacks (25 kg)', desc: 'Industrial sacks for manufacturers and export buyers.', icon: '🏭' },
+// Pack size config — defaultPrice is the fallback if not found in the database.
+// Admin can override any price by editing the matching product in the admin panel.
+const PACK_SIZES = [
+  { kg: 1,  name: 'Raw Blocks (1 kg)',      desc: 'Traditional solid form — ideal for households and soap makers.',          image: '/cocoa-potash-1kg.jpg',        defaultPrice: 32 },
+  { kg: 5,  name: 'Packaged Bags (5 kg)',   desc: 'Convenience-sized bags for small businesses and workshops.',             image: '/cocoa-potash5kg.jpg',         defaultPrice: 160 },
+  { kg: 25, name: 'Bulk Sacks (25 kg)',     desc: 'Industrial sacks for manufacturers and export buyers.',                  image: '/cocoa-potash-25kg.jpg',       defaultPrice: 800 },
+  { kg: 50, name: 'Bulk Sacks (50 kg)',     desc: 'Extra-large bulk sacks for high-volume manufacturers and exporters.',    image: '/cocoa-potash-raw-blocks.jpg', defaultPrice: null },
 ];
 
+// Match a database product to a pack size by looking for the kg number in its name
+function matchProduct(apiProducts, kg) {
+  return apiProducts.find(p => {
+    const n = (p.name || '').toLowerCase().replace(/\s+/g, '');
+    return n.includes(`${kg}kg`) || n.includes(`(${kg}kg`) || n.includes(`${kg}kg)`);
+  });
+}
+
+function formatPrice(price) {
+  return `GHS ${Number(price).toFixed(2)}`;
+}
+
 export default function CocoaPotashPage() {
+  // Fetch all products so prices stay in sync with the admin panel
+  const { data: apiProducts = [] } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const res = await apiClient.getProducts({});
+      return res.data?.products || res.data || [];
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Build the final products list — API price wins over the default
+  const products = PACK_SIZES.map(size => {
+    const found = matchProduct(apiProducts, size.kg);
+    const livePrice = found?.price > 0 ? formatPrice(found.price) : null;
+    const fallback  = size.defaultPrice ? formatPrice(size.defaultPrice) : 'Contact for price';
+    return { ...size, price: livePrice || fallback, isLive: !!livePrice };
+  });
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
@@ -74,8 +110,8 @@ export default function CocoaPotashPage() {
             <div className="grid grid-cols-2 gap-4 lg:w-72 flex-shrink-0">
               {[
                 { value: '100%', label: 'Natural & Chemical-Free' },
-                { value: '3', label: 'Pack Sizes Available' },
-                { value: '25 kg', label: 'Max Bulk Sack Size' },
+                { value: '4', label: 'Pack Sizes Available' },
+                { value: '50 kg', label: 'Max Bulk Sack Size' },
                 { value: 'Export', label: 'Ready for Global Markets' },
               ].map((stat, i) => (
                 <div key={i} className="bg-white/10 border border-white/20 rounded-2xl p-5 text-center">
@@ -180,17 +216,36 @@ export default function CocoaPotashPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-green-900 mb-3">Available Pack Sizes</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Whether you're a household consumer or an industrial buyer, we have the right size for you.</p>
+            <p className="text-gray-500 max-w-xl mx-auto">From household use to large-scale industrial buyers — we have the right size for every need.</p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((p, i) => (
-              <div key={i} className="border border-green-100 rounded-2xl p-8 text-center hover:border-green-300 hover:shadow-lg transition-all group">
-                <div className="text-5xl mb-4">{p.icon}</div>
-                <h3 className="text-lg font-bold text-green-900 mb-2">{p.name}</h3>
-                <p className="text-gray-500 text-sm mb-6">{p.desc}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full">
-                  Price confirmed on delivery
-                </span>
+              <div key={i} className="border border-green-100 rounded-2xl overflow-hidden hover:border-green-300 hover:shadow-xl transition-all group flex flex-col">
+                {/* Product image — fixed height, centred crop */}
+                <div className="w-full overflow-hidden bg-gray-50 flex-shrink-0" style={{ height: '240px' }}>
+                  <img
+                    src={p.image}
+                    alt={p.name}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    onError={e => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+                {/* Card body */}
+                <div className="p-6 flex flex-col flex-1 text-center">
+                  <h3 className="text-base font-bold text-green-900 mb-2">{p.name}</h3>
+                  <p className="text-gray-500 text-sm mb-4 flex-1">{p.desc}</p>
+                  <div className="mb-3">
+                    <span className={`text-xl font-extrabold ${p.price.startsWith('GHS') ? 'text-amber-600' : 'text-green-700'}`}>
+                      {p.price}
+                    </span>
+                    {p.isLive && (
+                      <span className="ml-2 text-xs font-semibold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full align-middle">live</span>
+                    )}
+                  </div>
+                  <span className="inline-flex items-center justify-center gap-1 text-xs font-semibold bg-green-100 text-green-700 px-3 py-1.5 rounded-full">
+                    Order &amp; we'll confirm
+                  </span>
+                </div>
               </div>
             ))}
           </div>

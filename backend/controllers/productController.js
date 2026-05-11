@@ -38,23 +38,43 @@ const getProductById = async (req, res) => {
   }
 };
 
-// POST /api/products
+// POST /api/products (admin only)
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, countInStock, image } = req.body;
-    
-    const product = new Product({
-      name,
-      description,
-      price,
-      countInStock,
-      image
-    });
-    
-    const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    const { name, description, price, image, status } = req.body;
+    const countInStock = req.body.countInStock ?? req.body.stock ?? 0;
+    const product = await Product.create({ name, description, price, countInStock, image, status });
+    res.status(201).json({ success: true, data: { product } });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating product' });
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// PUT /api/products/:id (admin only)
+const updateProduct = async (req, res) => {
+  try {
+    const allowed = ['name', 'description', 'price', 'image', 'status'];
+    const fields = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) fields[f] = req.body[f]; });
+    if (req.body.countInStock !== undefined) fields.countInStock = req.body.countInStock;
+    else if (req.body.stock !== undefined) fields.countInStock = req.body.stock;
+
+    const product = await Product.findByIdAndUpdate(req.params.id, fields, { new: true, runValidators: true });
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    res.json({ success: true, data: { product } });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// DELETE /api/products/:id (admin only)
+const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    res.status(200).json({ success: true, message: 'Product deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -74,5 +94,7 @@ module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
+  updateProduct,
+  deleteProduct,
   getCategories,
 };

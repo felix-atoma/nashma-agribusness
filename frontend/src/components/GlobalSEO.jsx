@@ -118,12 +118,12 @@ const structuredData = {
     {
       '@type': 'Service',
       '@id': `${BASE_URL}/services#african-black-soap`,
-      'name': 'African Black Soap Production',
+      'name': 'African Black Soap Supply',
       'description':
-        'Authentic African Black Soap made in Kumasi, Ghana using organic cocoa potash as the primary ingredient. 100% natural, chemical-free, made using traditional methods. Available wholesale and retail.',
+        'Authentic African Black Soap sourced and supplied in Kumasi, Ghana — made with organic cocoa potash as the primary ingredient. 100% natural, chemical-free, crafted using traditional methods. Available wholesale and retail.',
       'provider': { '@id': `${BASE_URL}/#organization` },
       'areaServed': { '@type': 'Country', 'name': 'Ghana' },
-      'serviceType': 'Natural Soap Manufacturing',
+      'serviceType': 'Natural Soap Supplier',
       'category': 'Organic Beauty & Wellness',
     },
 
@@ -231,7 +231,7 @@ export default function GlobalSEO() {
       />
       <meta
         name="keywords"
-        content="Nashma Agribusiness, cocoa potash Ghana, potash supplier Ghana, African black soap Ghana, black soap manufacturer Ghana, organic black soap Ghana, women potash training Ghana, potash making training, organic potash Ghana, black soap training Ghana, buy potash Ghana, buy African black soap Ghana, agribusiness Ghana, cocoa farming supplies, potash fertilizer Ghana, sustainable farming Ghana, women empowerment agribusiness, youth training agribusiness Ghana, cocoa potash supplier Africa, farm inputs Ghana, Kumasi agribusiness, Ashanti Region farming"
+        content="Nashma Agribusiness, cocoa potash Ghana, potash supplier Ghana, African black soap Ghana, black soap supplier Ghana, organic black soap Ghana, women potash training Ghana, potash making training, organic potash Ghana, black soap training Ghana, buy potash Ghana, buy African black soap Ghana, agribusiness Ghana, cocoa farming supplies, potash fertilizer Ghana, sustainable farming Ghana, women empowerment agribusiness, youth training agribusiness Ghana, cocoa potash supplier Africa, farm inputs Ghana, Kumasi agribusiness, Ashanti Region farming"
       />
       <meta name="author" content="Nashma Agribusiness Ltd" />
       <meta

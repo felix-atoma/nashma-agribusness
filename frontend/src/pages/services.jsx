@@ -28,10 +28,10 @@ const services = [
   {
     id: "african-black-soap",
     image: "/20241112_165130.jpg",
-    title: "African Black Soap Production",
+    title: "African Black Soap",
     tagline: "Traditional. Natural. Chemical-Free.",
     description:
-      "We produce authentic African Black Soap using our own organic cocoa potash as the primary ingredient. Made using time-honoured traditional methods, our black soap is 100% natural, deeply nourishing, and free from harmful chemicals. Available for wholesale and retail.",
+      "We source and supply authentic African Black Soap made with organic cocoa potash as the primary ingredient. Crafted using time-honoured traditional methods, it is 100% natural, deeply nourishing, and free from harmful chemicals. Available for wholesale and retail.",
     icon: <FaFlask className="w-6 h-6" />,
     color: "from-amber-500 to-orange-600",
     badge: "New & Featured",
@@ -134,11 +134,11 @@ const Services = () => {
         <title>Our Services — Nashma Agribusiness | Cocoa Potash, Black Soap & Training in Ghana</title>
         <meta
           name="description"
-          content="Nashma Agribusiness offers cocoa potash production, African black soap manufacturing, women's skills training, global bulk supply, and sustainable farming workshops across Ghana."
+          content="Nashma Agribusiness offers cocoa potash production, African black soap supply, women's skills training, global bulk supply, and sustainable farming workshops across Ghana."
         />
         <meta
           name="keywords"
-          content="Nashma Agribusiness services, cocoa potash production Ghana, African black soap Ghana, black soap manufacturing, women potash training, sustainable farming, global potash supply, agribusiness Ghana"
+          content="Nashma Agribusiness services, cocoa potash production Ghana, African black soap Ghana, black soap supplier Ghana, women potash training, sustainable farming, global potash supply, agribusiness Ghana"
         />
         <link rel="canonical" href="https://www.nashmaagribusiness.com/services" />
         <meta property="og:title" content="Our Services — Nashma Agribusiness | Cocoa Potash & Black Soap" />

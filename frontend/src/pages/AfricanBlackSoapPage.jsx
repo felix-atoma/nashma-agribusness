@@ -48,10 +48,10 @@ export default function AfricanBlackSoapPage() {
               </div>
               <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
                 African Black Soap<br />
-                <span className="text-amber-200">Production</span>
+                <span className="text-amber-200">Supply</span>
               </h1>
               <p className="text-orange-100 text-lg leading-relaxed mb-8">
-                Handcrafted in the West African tradition, Nashma's African Black Soap combines cocoa potash, shea butter and natural plant oils into a powerful yet gentle cleanser trusted across generations for healthy, radiant skin.
+                Nashma sources and supplies authentic African Black Soap — crafted in the West African tradition with cocoa potash, shea butter and natural plant oils. A powerful yet gentle cleanser trusted across generations for healthy, radiant skin.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
@@ -98,10 +98,10 @@ export default function AfricanBlackSoapPage() {
                 African Black Soap — known as <em className="font-semibold text-amber-700">Alata Samina</em> in Ghana — has been made by West African women for centuries. It earns its distinctive dark color from the natural plant ashes and oils used in its creation.
               </p>
               <p className="text-gray-600 leading-relaxed mb-6">
-                At Nashma, we produce our black soap using our own high-quality cocoa potash as the alkaline base, blended with shea butter sourced from women cooperatives in Northern Ghana. Every bar is handcrafted, preserving the authenticity that makes this soap so effective.
+                At Nashma, we source and supply authentic African Black Soap crafted with high-quality cocoa potash as the alkaline base, blended with shea butter from women cooperatives in Northern Ghana. Every bar preserves the traditional authenticity that makes this soap so effective.
               </p>
               <ul className="space-y-3">
-                {['Handcrafted in small batches for quality assurance', 'Uses Nashma\'s own cocoa potash', 'Shea butter sourced from women cooperatives', 'Suitable for face, body and hair'].map((pt, i) => (
+                {['Quality-checked in small batches before supply', 'Made with organic cocoa potash as the base', 'Shea butter sourced from women cooperatives', 'Suitable for face, body and hair'].map((pt, i) => (
                   <li key={i} className="flex items-center gap-3 text-green-800">
                     <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
                     {pt}
@@ -151,8 +151,8 @@ export default function AfricanBlackSoapPage() {
       <section className="py-20 px-4 bg-green-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-green-900 mb-3">How We Make It</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Our traditional process — unchanged for generations — produces soap with unmatched purity and effectiveness.</p>
+            <h2 className="text-3xl font-bold text-green-900 mb-3">How It's Made</h2>
+            <p className="text-gray-500 max-w-xl mx-auto">The traditional process — unchanged for generations — produces soap with unmatched purity and effectiveness.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {steps.map((s, i) => (

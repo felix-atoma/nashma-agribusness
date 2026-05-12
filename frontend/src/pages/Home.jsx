@@ -24,7 +24,7 @@ const slides = [
     image: "/20241112_164309.jpg",
     title: "Women-Led Potash & Black Soap Training",
     description:
-      "We train women and youth to produce organic potash and authentic African Black Soap — turning cocoa waste into lasting, dignified livelihoods.",
+      "We train women and youth to produce organic potash — turning cocoa waste into lasting, dignified livelihoods. We also supply authentic African Black Soap.",
     icon: <FaSeedling className="text-4xl mb-4 text-green-400" />,
     primaryCta: { text: "Our Services", path: "/services" },
     secondaryCta: { text: "Learn More", path: "/about" },

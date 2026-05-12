@@ -48,13 +48,6 @@ export const OrderProvider = ({ children }) => {
       console.error('Failed to fetch orders:', error);
       const errorMsg = error.response?.data?.message || error.message || "Failed to fetch orders";
       setError(errorMsg);
-      
-      // Show error toast
-      toast.error('Failed to load orders. Please try again.', {
-        autoClose: 3000,
-        position: 'bottom-right'
-      });
-      
       throw error;
     } finally {
       setLoading(false);
@@ -62,11 +55,9 @@ export const OrderProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (initialized && isAuthenticated && user) {
-      console.log('OrderContext: Fetching orders for user:', user._id);
+    if (initialized && isAuthenticated && user && user.role !== 'admin') {
       fetchUserOrders();
     } else {
-      console.log('OrderContext: Clearing orders - not authenticated');
       setOrders([]);
       setError(null);
     }

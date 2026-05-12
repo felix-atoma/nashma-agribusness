@@ -49,6 +49,9 @@ import ProtectedRoute from './pages/ProtectedRoute';
 import AdminRoute from './pages/AdminRoute';
 import AdminOrders from './pages/AdminOrders';
 import LoadingSpinner from './components/LoadingSpinner';
+import AuthDrawer from './components/AuthDrawer';
+import CartDrawer from './components/CartDrawer';
+import CheckoutDrawer from './components/CheckoutDrawer';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export const googleOAuthEnabled =
@@ -117,6 +120,10 @@ function App() {
                   <Route path="*" element={<Navigate to="not-found" replace />} />
                 </Routes>
               </React.Suspense>
+
+              <AuthDrawer />
+              <CartDrawer />
+              <CheckoutDrawer />
 
               <ToastContainer
                 position="top-right"

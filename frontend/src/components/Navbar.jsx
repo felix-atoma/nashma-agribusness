@@ -24,8 +24,8 @@ const Navbar = () => {
     { name: "Farming Workshops", path: "/services/farming-workshops", icon: <FaLeaf className="w-4 h-4" />, color: "text-teal-600" },
   ];
 
-  const { cart, loading: cartLoading } = useCart();
-  const { user, logout, loading: authLoading } = useAuth();
+  const { cart, loading: cartLoading, openCart } = useCart();
+  const { user, logout, loading: authLoading, openAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,18 +80,12 @@ const Navbar = () => {
   };
 
   const handleCartClick = (e) => {
+    e.preventDefault();
     if (!isAuthenticated) {
-      e.preventDefault();
-      navigate("/login", {
-        state: {
-          from: "cart",
-          returnTo: "/cart",
-          message: "Please login to view your cart",
-        },
-      });
+      openAuth('login');
       return;
     }
-    // If authenticated, navigation will proceed normally via Link
+    openCart();
   };
 
   const handleLogout = () => {
@@ -270,13 +264,12 @@ const Navbar = () => {
 
             {/* Cart Icon */}
             <li className="relative ml-2">
-              <Link 
-                to="/cart" 
-                onClick={handleCartClick} 
+              <button
+                onClick={handleCartClick}
                 className="flex items-center p-3 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-900 transition-all duration-300 group"
               >
                 <CartIconWithBadge />
-              </Link>
+              </button>
             </li>
 
             {/* User Menu */}
@@ -346,18 +339,18 @@ const Navbar = () => {
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
-                      <Link
-                        to="/login"
+                      <button
+                        onClick={() => openAuth('login')}
                         className="px-4 py-2 text-green-700 hover:text-green-900 font-semibold transition-colors"
                       >
                         Login
-                      </Link>
-                      <Link
-                        to="/signup"
+                      </button>
+                      <button
+                        onClick={() => openAuth('signup')}
                         className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl font-semibold"
                       >
                         Sign Up
-                      </Link>
+                      </button>
                     </div>
                   )}
                 </>
@@ -438,20 +431,18 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <Link
-                  to="/login"
-                  className="block text-center bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
-                  onClick={() => setMenuOpen(false)}
+                <button
+                  onClick={() => { setMenuOpen(false); openAuth('login'); }}
+                  className="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
                 >
                   Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="block text-center border-2 border-green-600 text-green-600 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
-                  onClick={() => setMenuOpen(false)}
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); openAuth('signup'); }}
+                  className="block w-full text-center border-2 border-green-600 text-green-600 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors"
                 >
                   Sign Up
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -517,18 +508,14 @@ const Navbar = () => {
             </li>
           ))}
 
-          {/* Cart Link in Mobile */}
+          {/* Cart in Mobile */}
           <li className="border-b border-green-50">
-            <Link
-              to="/cart"
-              onClick={(e) => {
-                handleCartClick(e);
-                setMenuOpen(false);
-              }}
-              className="flex items-center justify-between px-6 py-4 text-green-800 hover:text-green-900 hover:bg-green-50 font-semibold text-base transition-colors"
+            <button
+              onClick={(e) => { handleCartClick(e); setMenuOpen(false); }}
+              className="flex items-center justify-between w-full px-6 py-4 text-green-800 hover:text-green-900 hover:bg-green-50 font-semibold text-base transition-colors text-left"
             >
               <CartIconWithBadge showText={true} />
-            </Link>
+            </button>
           </li>
 
           {/* Logout for mobile */}

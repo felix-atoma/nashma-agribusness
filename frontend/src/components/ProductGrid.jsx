@@ -1,61 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ProductCard from './ProductCard';
+import { ShoppingBag } from 'lucide-react';
+
+const SkeletonCard = () => (
+  <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm animate-pulse">
+    <div className="aspect-square bg-gray-100" />
+    <div className="p-4 space-y-3">
+      <div className="h-4 bg-gray-100 rounded-lg w-3/4" />
+      <div className="h-3 bg-gray-100 rounded-lg w-full" />
+      <div className="h-3 bg-gray-100 rounded-lg w-2/3" />
+      <div className="flex items-center justify-between pt-1">
+        <div className="h-5 bg-gray-100 rounded-lg w-1/3" />
+        <div className="h-5 bg-gray-100 rounded-full w-1/3" />
+      </div>
+      <div className="h-9 bg-gray-100 rounded-xl w-full mt-1" />
+    </div>
+  </div>
+);
 
 const ProductGrid = ({ products = [], loading = false }) => {
-  const [animated, setAnimated] = useState(false);
-  
-  useEffect(() => {
-    setAnimated(true);
-  }, []);
-
-  // Ensure products is always an array
   const safeProducts = Array.isArray(products) ? products : [];
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[...Array(8)].map((_, i) => (
-          <div 
-            key={i} 
-            className="bg-white/80 backdrop-blur-sm rounded-2xl border border-green-200 h-80 animate-pulse shadow-lg"
-            style={{ 
-              animationDelay: `${i * 100}ms`,
-              animationDuration: '2s'
-            }}
-          />
-        ))}
+        {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+      </div>
+    );
+  }
+
+  if (safeProducts.length === 0) {
+    return (
+      <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <ShoppingBag className="w-8 h-8 text-gray-300" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-1">No Products Found</h3>
+        <p className="text-gray-400 text-sm">Check back soon or try a different search.</p>
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {safeProducts.length > 0 ? (
-        safeProducts.map((product, index) => (
-          <div
-            key={product.id || product._id}
-            className={`transition-all duration-500 ${
-              animated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
-            style={{ transitionDelay: `${index * 100}ms` }}
-          >
-            <ProductCard product={product} />
-          </div>
-        ))
-      ) : (
-        <div className="col-span-full text-center py-16">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-green-200 p-12 max-w-md mx-auto">
-            <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FaSeedling className="w-10 h-10 text-green-600" />
-            </div>
-            <h3 className="text-xl font-bold text-green-900 mb-2">No Products Found</h3>
-            <p className="text-green-700 mb-4">
-              We couldn't find any products matching your criteria.
-            </p>
-            <div className="w-12 h-1 bg-amber-500 mx-auto"></div>
-          </div>
-        </div>
-      )}
+      {safeProducts.map((product) => (
+        <ProductCard key={product.id || product._id} product={product} />
+      ))}
     </div>
   );
 };

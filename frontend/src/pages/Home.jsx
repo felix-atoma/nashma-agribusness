@@ -7,7 +7,7 @@ import WhyChooseUs from "../components/WhyChooseUs";
 import ContactPage from "../components/ContactPage";
 import Team from "../components/Team";
 import ServicesSection from "../components/servicesSection";
-import { FaArrowUp, FaLeaf, FaSeedling, FaRecycle, FaSpider, FaFlask } from "react-icons/fa";
+import { FaArrowUp, FaLeaf, FaSeedling, FaRecycle, FaSitemap, FaFlask } from "react-icons/fa";
 import { analytics } from "../utils/analytics";
 
 const slides = [
@@ -86,7 +86,7 @@ const Home = () => {
     { title: "Organic Farming", icon: <FaLeaf />, position: "top-left", delay: "0" },
     { title: "Community Empowerment", icon: <FaSeedling />, position: "top-right", delay: "100" },
     { title: "Sustainable Practices", icon: <FaRecycle />, position: "right-middle", delay: "200" },
-    { title: "Market Access", icon: <FaSpider />, position: "bottom-right", delay: "300" },
+    { title: "Market Access", icon: <FaSitemap />, position: "bottom-right", delay: "300" },
     { title: "Youth Training", icon: <FaSeedling />, position: "bottom-left", delay: "400" },
     { title: "Women Support", icon: <FaLeaf />, position: "left-middle", delay: "500" },
   ];
@@ -255,7 +255,7 @@ const Home = () => {
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-              <FaSpider className="w-4 h-4" />
+              <FaSitemap className="w-4 h-4" />
               Our Interconnected Network
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-green-900 mb-4">
@@ -276,7 +276,7 @@ const Home = () => {
             }`}>
               <div className="bg-gradient-to-br from-green-600 to-amber-600 text-white rounded-full p-8 shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-500 w-48 h-48 flex items-center justify-center text-center">
                 <div>
-                  <FaSpider className="w-12 h-12 mx-auto mb-2" />
+                  <FaSitemap className="w-12 h-12 mx-auto mb-2" />
                   <h3 className="font-bold text-lg">Nashma Core</h3>
                   <p className="text-green-100 text-sm">Sustainable Agriculture Hub</p>
                 </div>
@@ -379,7 +379,7 @@ const Home = () => {
               { icon: <FaLeaf className="text-2xl text-green-200" />, text: "Organic Farming" },
               { icon: <FaRecycle className="text-2xl text-amber-200" />, text: "Sustainable Practices" },
               { icon: <FaSeedling className="text-2xl text-green-200" />, text: "Quality Products" },
-              { icon: <FaSpider className="text-2xl text-amber-200" />, text: "Network Strength" }
+              { icon: <FaSitemap className="text-2xl text-amber-200" />, text: "Network Strength" }
             ].map((item, index) => (
               <div key={index} className="flex flex-col items-center gap-3">
                 {item.icon}

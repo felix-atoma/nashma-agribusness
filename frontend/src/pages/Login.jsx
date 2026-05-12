@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import AuthFormWrapper from './AuthFormWrapper';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import { googleOAuthEnabled } from '../App';
-import toast from '../utils/toast';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({ 
@@ -42,8 +42,7 @@ const Login = () => {
     }
   };
 
-  const handleGoogleFailure = (error) => {
-    console.error('Google login failed:', error);
+  const handleGoogleFailure = () => {
     toast.error('Google login failed. Please try again.');
   };
 

@@ -1,7 +1,7 @@
 // context/CartContext.js
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import apiClient from '../utils/apiClient';
-import toast from '../utils/toast';
+import { toast } from 'react-toastify';
 import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
@@ -141,14 +141,7 @@ export const CartProvider = ({ children }) => {
         cartData = defaultCart;
       }
       
-      const calculatedCart = updateCartState(cartData);
-      
-      // Log for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Cart fetched successfully:', calculatedCart);
-      }
-      
-      return calculatedCart;
+      return updateCartState(cartData);
     } catch (error) {
       // Retry once if request was cancelled
       if (error.message === 'Request was cancelled' && retryCount === 0) {
@@ -530,6 +523,14 @@ export const CartProvider = ({ children }) => {
     };
   }, [clearOperationTimeout]);
 
+  // Cart drawer state
+  const [cartOpen,     setCartOpen]     = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const openCart      = () => setCartOpen(true);
+  const closeCart     = () => setCartOpen(false);
+  const openCheckout  = () => { setCartOpen(false); setCheckoutOpen(true); };
+  const closeCheckout = () => setCheckoutOpen(false);
+
   const value = {
     cart,
     loading: isLoading,
@@ -544,6 +545,8 @@ export const CartProvider = ({ children }) => {
     removeCoupon,
     clearCart,
     fetchCart,
+    cartOpen, openCart, closeCart,
+    checkoutOpen, openCheckout, closeCheckout,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

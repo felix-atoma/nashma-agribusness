@@ -3,7 +3,7 @@ import { UserPlus, Mail, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { FaLeaf, FaSeedling } from 'react-icons/fa';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import toast from '../utils/toast';
+import { toast } from 'react-toastify';
 import AuthFormWrapper from './AuthFormWrapper';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import { googleOAuthEnabled } from '../App';
@@ -54,8 +54,7 @@ const Signup = () => {
     }
   };
 
-  const handleGoogleFailure = (error) => {
-    console.error('Google signup failed:', error);
+  const handleGoogleFailure = () => {
     toast.error('Google signup failed. Please try again.');
   };
 

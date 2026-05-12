@@ -19,26 +19,19 @@ export const OrderProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching orders from API...');
       const response = await apiClient.getOrders();
-      
-      console.log('Orders API response:', response);
-      
+
       if (response.success) {
         let ordersData = [];
-        
-        // Handle the specific response structure: {data: {orders: []}}
+
         if (response.data && response.data.orders && Array.isArray(response.data.orders)) {
           ordersData = response.data.orders;
-        } 
-        // Handle other possible structures
-        else if (Array.isArray(response.data)) {
+        } else if (Array.isArray(response.data)) {
           ordersData = response.data;
         } else if (response.data && Array.isArray(response.data.data)) {
           ordersData = response.data.data;
         }
-        
-        console.log('Processed orders data:', ordersData);
+
         setOrders(ordersData);
         return ordersData;
       } else {

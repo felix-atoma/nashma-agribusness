@@ -44,15 +44,7 @@ const ProductDetail = () => {
     setSelectedImage(0);
   }, [product?.id]);
 
-  // Debug: Log the complete product data
-  useEffect(() => {
-    if (product) {
-      console.log('Complete product data:', product);
-      console.log('Product keys:', Object.keys(product));
-    }
-  }, [product]);
-
-  if (!id) {
+if (!id) {
     return (
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
         <div className="bg-red-50 text-red-600 p-4 rounded-lg inline-block">

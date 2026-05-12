@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../utils/apiClient';
 import { authService } from '../utils/authService';
-import toast from '../utils/toast';
+import { toast } from 'react-toastify';
 
 const AuthContext = createContext();
 
@@ -318,6 +318,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Auth drawer state
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const openAuth  = (mode = 'login') => { setAuthMode(mode); setAuthOpen(true); };
+  const closeAuth = () => setAuthOpen(false);
+
   // Memoized context value
   const contextValue = useMemo(() => ({
     user: authState.user,
@@ -334,7 +340,8 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     isAuthenticated: !!authState.user,
     isAdmin: () => authState.user?.role === 'admin',
-  }), [authState]);
+    authOpen, authMode, openAuth, closeAuth,
+  }), [authState, authOpen, authMode]);
 
   return (
     <AuthContext.Provider value={contextValue}>

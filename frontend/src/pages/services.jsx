@@ -63,17 +63,17 @@ const services = [
   {
     id: "global-bulk-supply",
     image: "/20241126_165239.jpg",
-    title: "Global Bulk Supply",
-    tagline: "From Ghana to the World.",
+    title: "Bulk Supply",
+    tagline: "Quality Agro-Products in Bulk.",
     description:
-      "We handle the efficient global supply of bulk organic potash and agro-commodities, connecting Ghanaian producers directly with international buyers. Our logistics-first approach means farmers focus on quality production while we handle everything else.",
+      "We supply bulk organic potash, African black soap and shea butter to businesses across Ghana. Our approach means buyers get consistent quality, flexible pack sizes and reliable delivery — all at competitive prices.",
     icon: <FaGlobe className="w-6 h-6" />,
     color: "from-blue-500 to-cyan-600",
-    badge: "International",
+    badge: "Bulk Orders",
     features: [
-      "International bulk shipping",
-      "Direct producer–buyer links",
-      "Full logistics management",
+      "Flexible quantities available",
+      "Direct farm-to-business supply",
+      "Custom packaging options",
       "Competitive pricing",
     ],
   },
@@ -134,7 +134,7 @@ const Services = () => {
         <title>Our Services — Nashma Agribusiness | Cocoa Potash, Black Soap & Training in Ghana</title>
         <meta
           name="description"
-          content="Nashma Agribusiness offers cocoa potash production, African black soap supply, women's skills training, global bulk supply, and sustainable farming workshops across Ghana."
+          content="Nashma Agribusiness offers cocoa potash production, African black soap supply, women's skills training, bulk supply of agro-products, and sustainable farming workshops across Ghana."
         />
         <meta
           name="keywords"

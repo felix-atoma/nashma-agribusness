@@ -25,8 +25,8 @@ const uses = [
 const PACK_SIZES = [
   { kg: 1,  name: 'Raw Blocks (1 kg)',      desc: 'Traditional solid form — ideal for households and soap makers.',          image: '/cocoa-potash-1kg.jpg',        defaultPrice: 32 },
   { kg: 5,  name: 'Packaged Bags (5 kg)',   desc: 'Convenience-sized bags for small businesses and workshops.',             image: '/cocoa-potash5kg.jpg',         defaultPrice: 160 },
-  { kg: 25, name: 'Bulk Sacks (25 kg)',     desc: 'Industrial sacks for manufacturers and export buyers.',                  image: '/cocoa-potash-25kg.jpg',       defaultPrice: 800 },
-  { kg: 50, name: 'Bulk Sacks (50 kg)',     desc: 'Extra-large bulk sacks for high-volume manufacturers and exporters.',    image: '/cocoa-potash-raw-blocks.jpg', defaultPrice: null },
+  { kg: 25, name: 'Bulk Sacks (25 kg)',     desc: 'Industrial sacks for manufacturers and large-scale buyers.',             image: '/cocoa-potash-25kg.jpg',       defaultPrice: 800 },
+  { kg: 50, name: 'Bulk Sacks (50 kg)',     desc: 'Extra-large bulk sacks for high-volume manufacturers and businesses.',   image: '/cocoa-potash-raw-blocks.jpg', defaultPrice: null },
 ];
 
 // Match a database product to a pack size by looking for the kg number in its name
@@ -86,7 +86,7 @@ export default function CocoaPotashPage() {
                 <span className="text-amber-400">Production</span>
               </h1>
               <p className="text-green-100 text-lg leading-relaxed mb-8">
-                Nashma Agribusiness produces premium-grade cocoa potash (potassium carbonate) from sustainably harvested cocoa pods using traditional Ghanaian methods — delivering 100% natural, chemical-free potash for soap makers, farmers, food processors and export markets worldwide.
+                Nashma Agribusiness produces premium-grade cocoa potash (potassium carbonate) from sustainably harvested cocoa pods using traditional Ghanaian methods — delivering 100% natural, chemical-free potash for soap makers, farmers and food processors across Ghana.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
@@ -112,7 +112,7 @@ export default function CocoaPotashPage() {
                 { value: '100%', label: 'Natural & Chemical-Free' },
                 { value: '4', label: 'Pack Sizes Available' },
                 { value: '50 kg', label: 'Max Bulk Sack Size' },
-                { value: 'Export', label: 'Ready for Global Markets' },
+                { value: 'Bulk', label: 'Orders Available' },
               ].map((stat, i) => (
                 <div key={i} className="bg-white/10 border border-white/20 rounded-2xl p-5 text-center">
                   <div className="text-2xl font-extrabold text-amber-400 mb-1">{stat.value}</div>
@@ -131,7 +131,7 @@ export default function CocoaPotashPage() {
             <div>
               <h2 className="text-3xl font-bold text-green-900 mb-4">What is Cocoa Potash?</h2>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Cocoa potash — known locally as <em className="font-semibold text-green-700">Kantu</em> — is a potassium-rich alkaline ash produced by burning dried cocoa pod husks. It has been used in West African households and industries for centuries.
+                Cocoa potash — known locally as <em className="font-semibold text-green-700">kanwu</em> — is a potassium-rich alkaline ash produced by burning dried cocoa pod husks. It has been used in West African households and industries for centuries.
               </p>
               <p className="text-gray-600 leading-relaxed mb-6">
                 At Nashma, we refine this traditional process with modern quality controls to produce consistent, high-purity potash that meets the needs of both small-scale artisans and industrial buyers.
@@ -264,7 +264,7 @@ export default function CocoaPotashPage() {
           <Leaf className="w-12 h-12 text-amber-400 mx-auto mb-6" />
           <h2 className="text-3xl font-bold mb-4">Ready to Order or Partner With Us?</h2>
           <p className="text-green-200 text-lg mb-10">
-            Contact us today for pricing, bulk quotes, export inquiries or to learn more about our cocoa potash products.
+            Contact us today for pricing, bulk quotes or to learn more about our cocoa potash products.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="tel:+233545086577" className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-8 py-4 rounded-xl transition-all shadow-lg">

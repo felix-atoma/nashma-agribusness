@@ -189,13 +189,13 @@ const structuredData = {
     {
       '@type': 'Service',
       '@id': `${BASE_URL}/services#global-bulk-supply`,
-      'name': 'Cocoa Potash Global Bulk Supply',
+      'name': 'Bulk Supply of Agro-Products',
       'description':
-        'International bulk supply of organic cocoa potash and agro-commodities. Direct market access for producers — we handle logistics so farmers focus on production.',
+        'Bulk supply of organic cocoa potash, African black soap and shea butter to businesses across Ghana. Flexible quantities, custom packaging and reliable delivery.',
       'provider': { '@id': `${BASE_URL}/#organization` },
-      'areaServed': { '@type': 'Place', 'name': 'Africa' },
+      'areaServed': { '@type': 'Country', 'name': 'Ghana' },
       'serviceType': 'Agro-commodity Supply',
-      'category': 'Export & Logistics',
+      'category': 'Bulk Supply & Distribution',
     },
 
     // ── Service: Sustainable Farming Workshops ────────────────────────────
